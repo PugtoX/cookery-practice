@@ -23,16 +23,15 @@ and every one is safe to delete.
 
 I got this wrong twice, both times by saying more than I had measured.
 
-First I called the no-JavaScript path "delivered" because the service answered with a
+First I called the no-JavaScript path "delivered" when the service answered with a
 redirect. That submission had actually been filed as spam.
 
-Then I told you that path always lands in spam. **Also wrong.** Early submissions were
-filed as spam; later submissions with the same field values went to your inbox. Something
-on the service's side changed during those minutes, and I cannot tell from here what it
-was.
+Then I said that path always lands in spam. **Also wrong.** Early submissions were filed as
+spam; later ones with the same field values went to your inbox. Something changed on the
+service's side during those minutes and I cannot tell what.
 
-The one habit worth keeping: if a message ever goes missing, check the spam folder before
-concluding the form is broken. That is the only place it would be.
+So nothing in your site needs changing. If a message ever seems to go missing, check the
+spam folder first. Filtering is the only thing I have seen get in the way, and not since.
 
 ## What is genuinely worth fixing
 

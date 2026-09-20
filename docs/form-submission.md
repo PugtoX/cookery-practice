@@ -141,13 +141,16 @@ Four things are actually established, and one of them is the answer:
    varied. Acceptance is also not delivery.
 2. **Very early submissions were filed to spam**: six of them, `12:06` through `12:17`,
    all from `nojs-live@example.com`, all complete.
-3. **From `12:17` onward, none were.** Six consecutive submissions all landed in the
-   inbox: `12:17`, `12:20`, `12:21` twice, and `12:22` twice-sent-but-stored-once. The
-   `12:17` one is the interesting one, arriving at the same moment as the last spam row.
-4. **The same payload got both verdicts.** A complete submission with the same field values
-   was filed to spam at `12:15` and `12:17`, and reached the inbox at `12:15` and `12:17`,
-   so there is no payload-level rule to find. The dashboard shows minutes, not seconds, so
-   "the same minute" is as close as these readings get.
+3. **No spam row appears after `12:17` in this snapshot.** Six submissions arrived from
+   then on and their rows are in the inbox: `12:17`, `12:20`, `12:21` twice, and `12:22`
+   sent twice but stored once. Four distinct minutes carrying six submissions is a
+   comprehension trap worth stating plainly. The `12:17` one is the interesting one,
+   arriving in the same minute as the last spam row.
+4. **The same field values got both verdicts.** A complete submission with identical field
+   values was filed to spam at `12:15` and `12:17`, and reached the inbox at `12:15` and
+   `12:17`, so there is no rule keyed on what the form sends. These came from **different
+   submitters**, so this is a comparison of payloads, not a controlled trial. The dashboard
+   shows minutes, not seconds, so "the same minute" is as close as these readings get.
 
 Two things are **suggested but not established**, and are labelled that way on purpose:
 
@@ -159,22 +162,28 @@ Two things are **suggested but not established**, and are labelled that way on p
   inbox while complete ones were still being filed to spam around it. But that partial
   came from a different submitter, so it is one observation, not a controlled comparison.
 
-All that can be said is that **the filing changed between `12:06` and `12:17` and then
-stopped changing. Nothing in these readings identifies which factor moved.** A server-side
-filter, a per-IP or per-device rate limit that tripped and then reset, a reputation change
-triggered by the accepted submissions themselves, a time-based threshold, or **a person
-touching this dashboard** — the same surface these readings come from — would each fit.
-Naming one would be the same overclaim in a fourth version, so none is named. What can be
-said without reaching is the consequence:
+All that can be said is that **no submission was filed to spam after `12:17` in this
+window, while inbox rows kept arriving. Nothing in these readings identifies which factor
+moved.** A server-side filter, a per-IP or per-device rate limit that tripped and then
+reset, a reputation change triggered by the accepted submissions themselves, a time-based
+threshold, or **a person touching this dashboard** — the same surface these readings come
+from — would each fit. Naming one would be the same overclaim in a fifth version, so none
+is named. What can be said without reaching is the consequence:
 
-> A submission filed as spam is an event this project cannot predict or control, and it
-> stopped happening on its own. It is **not** a property of the JavaScript-off path, and
-> it is not something to fix in the markup.
+> A submission filed as spam is an event this project cannot predict or control, and none
+> has been filed that way since `12:17`. It is **not** a property of the JavaScript-off
+> path, and it is not something to fix in the markup.
 
-One limit on all of the above, stated because it weakens the case for any mechanism: **the
-dashboard shows names and times, never field values.** The claim that the same payload
-reached both buckets rests on what was typed into the form, not on anything the readings
-themselves display.
+Three limits on all of the above, stated because they weaken the case for any mechanism:
+
+- **The dashboard shows names and times, never field values.** The claim that the same
+  payload reached both buckets rests on what was typed into the form, not on anything the
+  readings themselves display.
+- **Everything came from one machine and one address, inside a ~19-minute window.** No
+  submission from a second address exists, so a per-IP rule cannot be separated from a
+  per-form rule.
+- **There is no observation after `12:22`.** "No spam since" means no spam in this window,
+  not that the form is now settled.
 
 One incidental finding, from a **single** observation: two byte-identical submissions sent
 back to back produced **one dashboard row**, not two. Two were sent and one row appeared;
