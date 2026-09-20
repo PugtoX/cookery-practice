@@ -30,6 +30,11 @@ const classes = [
     description:
       'A five-hour bread baking class in Sydney. Build a starter you keep, shape and proof a loaf, and find out why your last one was dense. Eight people, AUD 150.',
     h1: 'Bread baking class in Sydney',
+    // The name this course is called by everywhere else on the site (nav card, booking
+    // form option, recipes page, and the classes.html ItemList). The h1 is written for
+    // search; the JSON-LD name must match the rest of the site or the same product has
+    // two names to a machine reader.
+    courseName: 'Bread Baking Class Sydney',
     lede: 'A starter you take home, a loaf you shape yourself, and an honest answer to why the last one came out dense.',
     eyebrow: 'Five hours',
     price: '150',
@@ -63,6 +68,7 @@ const classes = [
     description:
       'A three-hour pasta making class in Sydney. Egg dough by hand, two shapes, and a sauce built in the same pan. No machine needed at home. Eight people, AUD 120.',
     h1: 'Pasta making class Sydney',
+    courseName: 'Pasta Making Class Sydney',
     lede: 'Egg dough made by hand — no machine to buy afterwards — rolled into two shapes and finished with a sauce built in the same pan.',
     eyebrow: 'Three hours',
     price: '120',
@@ -96,6 +102,7 @@ const classes = [
     description:
       'A full-day market to table class in Sydney. Shop the market with a budget in the morning, cook a shared table by the afternoon. Eight people, AUD 240.',
     h1: 'Market to table class in Sydney',
+    courseName: 'Market to Table Class Sydney',
     lede: 'We shop the market in the morning with a budget, decide the menu from what is actually good, then cook it as a shared table.',
     eyebrow: 'One day',
     price: '240',
@@ -140,7 +147,7 @@ const page = (c) => `<!doctype html>
     <meta property="og:title" content="${c.metaTitle}" />
     <meta property="og:description" content="${c.lede}" />
     <meta property="og:url" content="${ORIGIN}/classes/${c.slug}" />
-    <meta property="og:image" content="${ORIGIN}/assets/og.svg" />
+    <meta property="og:image" content="${ORIGIN}/assets/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -155,7 +162,7 @@ const page = (c) => `<!doctype html>
       {
         "@context": "https://schema.org",
         "@type": "Course",
-        "name": ${JSON.stringify(c.h1)},
+        "name": ${JSON.stringify(c.courseName)},
         "description": ${JSON.stringify(c.jsonDescription)},
         "url": "${ORIGIN}/classes/${c.slug}",
         "provider": {

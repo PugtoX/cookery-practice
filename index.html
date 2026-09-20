@@ -20,7 +20,7 @@
       content="Hands-on cooking classes in Sydney, capped at eight people. Knife skills, bread baking and pasta from scratch."
     />
     <meta property="og:url" content="https://pugtox.github.io/cookery-practice/" />
-    <meta property="og:image" content="https://pugtox.github.io/cookery-practice/assets/og.svg" />
+    <meta property="og:image" content="https://pugtox.github.io/cookery-practice/assets/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -38,7 +38,7 @@
         "name": "Cookery Class",
         "description": "Hands-on cooking classes in Sydney, capped at eight people per class.",
         "url": "https://pugtox.github.io/cookery-practice/",
-        "image": "https://pugtox.github.io/cookery-practice/assets/og.svg",
+        "image": "https://pugtox.github.io/cookery-practice/assets/og.png",
         "priceRange": "AUD 95–AUD 240",
         "currenciesAccepted": "AUD",
         "address": {
@@ -67,31 +67,38 @@
         "makesOffer": [
           {
             "@type": "Offer",
-            "itemOffered": { "@type": "Course", "name": "Knife Skills Basics" },
+            "itemOffered": { "@type": "Course", "name": "Knife Skills Class Sydney" },
             "price": "95",
             "priceCurrency": "AUD"
           },
           {
             "@type": "Offer",
-            "itemOffered": { "@type": "Course", "name": "Bread Baking Fundamentals" },
+            "itemOffered": { "@type": "Course", "name": "Bread Baking Class Sydney" },
             "price": "150",
             "priceCurrency": "AUD"
           },
           {
             "@type": "Offer",
-            "itemOffered": { "@type": "Course", "name": "Pasta From Scratch" },
+            "itemOffered": { "@type": "Course", "name": "Pasta Making Class Sydney" },
             "price": "120",
             "priceCurrency": "AUD"
           },
           {
             "@type": "Offer",
-            "itemOffered": { "@type": "Course", "name": "Saturday Market Table" },
+            "itemOffered": { "@type": "Course", "name": "Market to Table Class Sydney" },
             "price": "240",
             "priceCurrency": "AUD"
           }
         ]
       }
     </script>
+    <!-- NOTE on course names. The four Course names above, the ItemList in
+         classes.html and the Course JSON-LD on each class page are the SAME strings
+         ("Knife Skills Class Sydney", …). A machine reading the site must see one name
+         per product. The visible <h3> card headings below are deliberately shorter
+         ("Knife Skills Basics") for readability, and each links to a page whose h1
+         and title carry the full search phrase. Before this was aligned, three of the
+         four courses had two different machine-readable names. -->
   </head>
 
   <body>
@@ -190,10 +197,10 @@
             <a href="contact.html">contact page</a> has our email and phone number.
           </p>
 
-          <!-- The action is a real endpoint, not a decorative one. Submitting with
-               JavaScript disabled still POSTs here and still reaches the inbox —
-               the script only adds validation and a nicer failure message. Replace
-               the form id when you connect your own Formspree account; see README. -->
+          <!-- The action is a real endpoint, not a decorative one — but it ships as a
+               placeholder, so it is NOT connected yet. Until REPLACE_ME is swapped for a
+               real Formspree id, submitting cannot deliver anything, with or without
+               JavaScript, and the script says so rather than pretending. See README. -->
           <form
             id="callback"
             method="POST"

@@ -101,8 +101,8 @@ technically indexable.**
 
 | # | Deliverable | How specific | Accepted by |
 |---|---|---|---|
-| 1 | Multi-page static site, 7 pages: home, classes, recipes, about, contact, privacy, terms | Plain HTML/CSS, no framework, no build step, ~30 files like the brief | `structure-check.mjs` green |
-| 2 | Callback form on the home page, wired to a real endpoint | Native HTML POST, no JS required to submit; JS enhances only | Real submission received at the endpoint |
+| 1 | Multi-page static site, **11 pages**: home, classes, recipes, about, contact, privacy, terms, plus `classes/{knife-skills,bread-baking,pasta-from-scratch,market-table}` | Plain HTML/CSS, no framework. **30 files** to match the brief's shape, but there *is* a small build: `npm run build` copies the files and generates `sitemap.xml` from `site.config.yml`. No templating, no bundling, no minification — see `README.md` for why the sitemap is generated rather than hand-written | `structure-check.mjs` green (47/47) |
+| 2 | Callback form on the home page, wired to a Formspree endpoint | Native HTML POST, no JS required to submit; JS adds validation and error states only. **Status: the action ships as `REPLACE_ME`, so the browser path is proven but delivery to a real inbox is not** — see deliverable 11 and `readiness-gate.md` G3 | `tools/form-e2e.mjs` green (18/18); **real terminal delivery NOT verified** |
 | 3 | Client-side validation + spam protection | Required fields, length caps, honeypot, honest failure message | `npm test` green, and proven able to go red |
 | 4 | Technical SEO on **every** page | Canonical (self-referential, one per page), OG, twitter:card, JSON-LD, no accidental noindex | `seo-check.mjs` green |
 | 5 | `sitemap.xml` + `robots.txt` reachable | Absolute URLs on the canonical origin, one `<loc>` per indexable page | `seo-check.mjs` green |
@@ -127,6 +127,21 @@ scope rather than a post-launch observation. Agreed limits:
 
 A page that breaks one of these is not finished, and the measurement is taken on the
 live URL rather than locally — local results and deployed results differ.
+
+### Substitutions and gaps against the brief — stated, not omitted
+
+The practice build is not a one-to-one clone of the client's site. Every difference is
+listed here rather than left implicit, because a scope document that stays silent about
+a missing feature is worse than one that names it:
+
+| The brief has | This build has | Why |
+|---|---|---|
+| 4 blog pages | 4 **class** pages | The brief's blog content does not exist and writing it is out of scope. Class pages give the same thing the exercise needs: several real pages for internal linking, per-page canonicals and a sitemap with more than one entry. |
+| A sticky call button | **Not built** | It is in the client's QA list. Adding it here would be a layout change to a site that is already through stage 5 acceptance; noted as a gap instead of quietly skipped. |
+| An FAQ accordion | **Not built** | Same reasoning as the sticky button. |
+| Real business content and prices | Placeholder content, AUD figures | The site is public; the workspace rule is that previews carry no real names, brands or prices. |
+| Images, with alt text | No raster images at all | The brief asks for alt text "where missing or necessary". With no images, that check is **vacuously satisfied here and demonstrated only in `portfolio`** — not proven by this build. |
+| A live domain | A `github.io` sub-path | Stage 9 is not executed; see `readiness-gate.md` G2. |
 
 ### Explicitly out of scope for the client's money (matches his "important" note)
 

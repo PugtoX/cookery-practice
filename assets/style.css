@@ -5,7 +5,7 @@
    the numbers recorded in that page go stale the moment this file changes.
 
    Mobile first. 375px is the declared minimum width, not a "nice to have":
-   layout-check.mjs opens every page at 375px and fails on horizontal scroll.
+   viewport-check.mjs opens every page at 375px and fails on horizontal scroll.
    Every interactive control is at least 44px tall (Apple HIG / WCAG 2.1 SC
    2.5.5) — that is what viewport-check.mjs measures, and it is stricter than
    axe's 24px target-size rule, so axe passing does not mean this passes. */

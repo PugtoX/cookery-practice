@@ -91,7 +91,7 @@ ${s.html}
     <meta property="og:title" content="${esc(page.ogTitle)}" />
     <meta property="og:description" content="${esc(page.ogDescription ?? page.description)}" />
     <meta property="og:url" content="${url}" />
-    <meta property="og:image" content="${ORIGIN}/assets/og.svg" />
+    <meta property="og:image" content="${ORIGIN}/assets/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />

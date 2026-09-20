@@ -26,8 +26,18 @@ function showFieldErrors(errors) {
       box.textContent = message ?? ''
       box.hidden = !message
     }
-    if (message) field.setAttribute('aria-invalid', 'true')
-    else field.removeAttribute('aria-invalid')
+    if (message) {
+      field.setAttribute('aria-invalid', 'true')
+      // Point the field at its own message. Without this a screen reader announces
+      // "invalid entry" and the summary, but not **why** — the reason is in a
+      // sibling element it was never told about. WCAG 3.3.1 / 3.3.3.
+      // Neither Lighthouse's accessibility score nor axe's default rule set reports
+      // the omission, which is exactly why it is written down here.
+      if (box) field.setAttribute('aria-describedby', box.id)
+    } else {
+      field.removeAttribute('aria-invalid')
+      field.removeAttribute('aria-describedby')
+    }
   }
 }
 

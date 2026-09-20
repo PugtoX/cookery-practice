@@ -19,7 +19,8 @@ cd cookery-practice
 ```
 
 Node 20 or newer is needed for the build and the tests (they use `node --test` and
-ES modules). Node 24 is what CI uses.
+ES modules). Node 24 is what CI uses and what this has actually been run on — pin to 24
+if you want the version the results in `docs/lighthouse/` came from.
 
 ## Develop
 
@@ -89,6 +90,13 @@ success state appears, that the cooldown blocks a second send, that a 500 produc
 error rather than a fake success, and that an empty form never reaches the network. It
 needs `npm i -D --no-save puppeteer-core` first.
 
+To regenerate the social preview image after editing `assets/og.svg`:
+
+```bash
+npm i -D --no-save puppeteer-core
+node tools/make-og.mjs      # writes assets/og.png at 1200x630
+```
+
 **It cannot tell you the message arrived in an inbox** — the endpoint it posts to is a
 local one it starts itself. A real submission to the real form id, checked at the
 receiving end, is still required and is not claimed anywhere in this project.
@@ -115,9 +123,10 @@ npm i -D --no-save puppeteer-core
 
 The form on the home page posts to **Formspree**. Every field is validated in the
 browser first, but that is not what makes it work — the `action` attribute is. Even
-with JavaScript switched off, submitting the form reaches the inbox.
+with JavaScript switched off, a submission goes to whatever that attribute names.
 
-**It ships disconnected.** The action is:
+**It ships disconnected**, so at the moment nothing is delivered either way. The action
+is:
 
 ```
 https://formspree.io/f/REPLACE_ME
@@ -173,7 +182,8 @@ privacy.html  terms.html                 the pages
 classes/*.html                           one page per class
 assets/style.css                         the whole stylesheet
 assets/form.js  assets/validate.js       form wiring, and the rules on their own
-assets/og.svg                            social preview image (1200x630)
+assets/og.png                            social preview image (1200x630, raster)
+assets/og.svg                            the source it is rendered from — see make-og
 public/robots.txt                        copied to the site root at build time
 site.config.yml                          the domain — the only place it appears
 tools/                                   build, preview, link check, form e2e, generators
@@ -193,7 +203,7 @@ at once, and expect to lose any hand edits to those pages when you do.
 ## What this deliberately does not have
 
 - No framework, no bundler, no TypeScript.
-- No CSS framework. The stylesheet is about 380 lines and is meant to be read.
+- No CSS framework. The stylesheet is about 485 lines and is meant to be read.
 - No analytics, no cookies, no tracking.
 - No CMS. Editing the site means editing the files.
 - No redirects. GitHub Pages cannot issue them; that needs a different host or a

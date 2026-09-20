@@ -83,15 +83,27 @@ cpSync(join(root, 'assets'), join(dist, 'assets'), { recursive: true })
 cpSync(join(root, 'public'), dist, { recursive: true })
 
 // ---------- sitemap ----------
-// A page is in the sitemap when its canonical is self-referential AND it is not
-// noindex. seo-check.mjs asserts both directions of that rule, so this generator and
-// that checker have to agree on the definition — this is where they do.
+// A page is in the sitemap when it is not noindex. seo-check.mjs asserts both
+// directions of that rule, so this generator and that checker have to agree on the
+// definition — this is where they do.
 const urlFor = (page) => {
   const clean = page.replace(/\/index\.html$/i, '/').replace(/\.html$/i, '')
   return clean === 'index' ? base : `${base}${clean}`
 }
 
-const today = new Date().toISOString().slice(0, 10)
+// No <lastmod>, deliberately.
+//
+// The obvious implementation is `new Date()` at build time, and it is wrong: every
+// deploy then stamps every URL with today's date, including pages nobody touched.
+// Search engines learn to ignore a lastmod that changes without the content changing,
+// so a wrong one is worse than none.
+//
+// The honest alternative is the file's real modification date. Two reasons it is not
+// used here: this repository was created in a single commit, so every page shares one
+// date and the tag would carry no information; and CI checks out shallowly
+// (actions/checkout fetches one commit by default), so `git log -1 -- <file>` would
+// report the checkout time rather than the file's history. Revisit if the history
+// ever becomes meaningful — `<lastmod>` is optional in the sitemap protocol.
 const entries = []
 for (const rel of pages) {
   const html = readFileSync(join(root, rel), 'utf8')
@@ -111,7 +123,6 @@ ${entries
   .map(
     (e) => `  <url>
     <loc>${e.loc}</loc>
-    <lastmod>${today}</lastmod>
     <priority>${e.priority}</priority>
   </url>`,
   )

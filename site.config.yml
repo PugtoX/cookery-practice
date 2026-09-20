@@ -7,6 +7,6 @@
 # exactly the "changed half of it" mistake: canonical updated but og:url left behind.
 #
 # Sub-path deployments keep the sub-path in the origin (that is what makes canonical
-# self-referential and correct). Moving to a root domain means dropping it here AND
-# deleting one entry from SITE.localOrigins in tools/serve.mjs.
+# self-referential and correct). `tools/serve.mjs` reads the same prefix from this file,
+# so moving to a root domain needs no edit there either.
 origin: https://pugtox.github.io/cookery-practice/
