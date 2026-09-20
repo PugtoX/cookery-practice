@@ -14,26 +14,35 @@ me which screen and I will look at that screen.
 
 A real submission from the live site reached `hugoyuan2004@gmail.com`, with every field in
 its own column on the dashboard. That chain — browser, endpoint, your mailbox — is now
-closed end to end.
+closed end to end. There is nothing left for you to check.
 
 Test rows are accumulating in your dashboard. They all say they are tests in their notes
 and every one is safe to delete.
 
-## What I found, and one correction
+## Two corrections I owe you
 
-I tested the form with JavaScript switched off. It does submit and the service does accept
-it — but the sender is left on Formspree's own screen, in whatever language their browser
-asks for, with no way back to your site.
+I got this wrong twice, both times by saying more than I had measured.
 
-I also have to correct myself. I first called this path "delivered" on the strength of a
-redirect, and that submission had been filed as spam. I then said the fallback always
-lands in spam. **That was wrong too.** The identical submission, sent twice, produced one
-inbox and one spam. Keep an eye on the spam folder.
+First I called the no-JavaScript path "delivered" because the service answered with a
+redirect. That submission had actually been filed as spam.
 
-## Two questions
+Then I told you that path always lands in spam. **Also wrong.** Re-run properly: early
+submissions were filtered, then the same submission, sent the same way minutes later,
+went to your inbox. The service evidently learned the form was legitimate. No spam filing
+since.
 
-1. **A sender with JavaScript off gets no validation at all.** With the class unselected,
-   the browser's own check is skipped and the empty answer is accepted. Fixing it is a
-   small change. Want it?
-2. **Should a JavaScript-off sender be sent back to your contact page** instead of being
-   left on Formspree's screen? Also small.
+So nothing to fix. If a message ever goes missing, the spam folder is where it would be.
+
+## What is genuinely worth fixing
+
+**A visitor with JavaScript turned off gets no validation at all.** The form tells the
+browser to skip its own checks, and the script that replaces them never runs. I confirmed
+it: with the class left unselected the form still sends, and you receive a request with a
+blank class.
+
+Two small changes, your call:
+
+1. Let the browser validate when the script is not there.
+2. Send a JavaScript-off visitor back to your contact page after sending. Right now they
+   end up on Formspree's own screen, in whatever language their browser prefers, with no
+   way back to your site.

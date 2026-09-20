@@ -96,11 +96,19 @@ needs `npm i -D --no-save puppeteer-core` first.
 module never loads, so this path cannot be tested any other way. It checks the
 `method="POST"` attribute, that the native POST leaves with all five fields and an empty
 honeypot, and then submits to the real endpoint twice — once complete, once partial — to
-see where a JavaScript-off visitor actually ends up. **It is not a delivery test**:
-whether a submission reaches the inbox is decided server-side, and as measured it is not
-even consistent — the same complete submission was filed both ways inside one run. Read
-`docs/form-submission.md` for what was actually observed. This tool sends three live
-submissions each run and adds records to the form's dashboard.
+see where a JavaScript-off visitor actually ends up. **It is not a delivery test**, and it
+cannot tell you where the service filed anything: as measured, the same endpoint filed
+early submissions to spam and later identical ones to the inbox, so filing is a
+server-side judgement that changes over time. Read `docs/form-submission.md` for the
+timeline. This tool sends three submissions each run — two to the live endpoint and one to
+a local sink it starts itself — and adds records to the form's dashboard.
+
+**A real delivery was verified separately.** A submission made from the live site reached
+`hugoyuan2004@gmail.com` and the notification was read back out of the mailbox. That is
+the claim that matters, and it does not come from any test in this repository.
+
+Two more checks live in the workflow this project came from and are run from there,
+because they are shared across projects rather than owned by this one:
 
 To regenerate the social preview image after editing `assets/og.svg`:
 
@@ -108,10 +116,6 @@ To regenerate the social preview image after editing `assets/og.svg`:
 npm i -D --no-save puppeteer-core
 node tools/make-og.mjs      # writes assets/og.png at 1200x630
 ```
-
-**It cannot tell you the message arrived in an inbox** — the endpoint it posts to is a
-local one it starts itself. A real submission to the real form id, checked at the
-receiving end, is still required and is not claimed anywhere in this project.
 
 Two more checks live in the workflow this project came from and are run from there,
 because they are shared across projects rather than owned by this one:

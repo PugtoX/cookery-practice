@@ -101,20 +101,32 @@ Two further errors came out of the same revision:
    loaded no native POST happens at all, and every earlier test had exercised the AJAX
    path.
 
-**Then the replacement claim was also wrong.** The first corrected version said the
-fallback goes to spam while the JavaScript path does not. The discriminating experiment —
-the same complete browser-driven no-JS submission, repeated — split across **both**
-buckets inside a single run: `12:15` inbox, `12:15` spam, with identical payloads. An
-independent reviewer's scripted probes landed in the inbox; a partial one landed in the
-inbox; a honeypot-filled one landed in the inbox and was not blocked at all.
+**Then the replacement claim was also wrong, and the reason it was wrong is the point.**
+The first corrected version said the fallback goes to spam while the JavaScript path does
+not, and justified it with "the same complete submission was filed both ways inside one
+run". Re-running that experiment properly — two byte-identical complete submissions in one
+process, then one complete plus one partial with distinct markers — produced:
+
+- Both filed to the **inbox**. No spam at all.
+- The same payload that had been filed to spam at 12:15 was filed to the inbox at 12:15
+  and again at 12:17, so the timestamp alone settles nothing.
+- Two byte-identical submissions produced **one dashboard row**, i.e. the service
+  deduplicates identical payloads. That is why the earlier "sent twice, saw it split"
+  reasoning had no artifact behind it: there was only ever one row to see.
+
+The pattern that fits every reading is a filter that **changed its mind about this form
+during the window** — spam before ~12:17, inbox for six consecutive submissions after,
+including a deliberately partial one and a honeypot-filled one. So the original
+observation ("it was filed as spam") was true, the generalisation from it was false, and
+the retraction of that generalisation was itself over-claimed. Three wrong versions in a
+row, each time by asserting more than the measurement carried.
 
 **Lesson, which is the reason this entry exists:** the project's recurring failure is not
 a wrong measurement, it is a **conclusion stated more strongly than the measurement
-supports** — twice in a row here, in opposite directions. `302` is not delivery, and one
-spam filing is not a property of a code path. The classifier gave different verdicts for
-near-identical input, so the honest record is that filing is non-deterministic as
-measured, and the only way to learn what a real visitor gets is for a real visitor to
-send one.
+supports**. `302` is not delivery. One spam filing is not a property of a code path. And
+one split observation is not proof of non-determinism. The third version of
+`docs/form-submission.md` records what was measured and refuses to name a mechanism the
+data cannot support.
 
 **Impact on scope:** none. The form works; the endpoint accepts; the client's mailbox
 received a real message.
@@ -183,6 +195,6 @@ error, because it is the one nobody re-checks.**
 | Stage 9 (custom domain) not executed | Needs a purchased domain. |
 | No image compression evidence on this site | The site ships no raster images. That acceptance item is covered by `portfolio` (486 KB → 44.8 KB), not here. |
 | `novalidate` leaves the no-JS path unvalidated (CR-7) | It changes what a visitor sees on a path nobody asked about. Offered to the client instead. |
-| Where Formspree files a submission (CR-6) | Not measurable from here, and non-deterministic as measured. Only a human no-JS submission settles it. |
+| Where Formspree files a submission (CR-6) | Not measurable from here, and it changes over time — early submissions to spam, later identical ones to the inbox. Resolved in practice: no spam since `12:17`. |
 | No real-device test on a phone | The 375px checks run in a browser with an emulated viewport. That is not a phone, and it is not described as one. |
 | ~~No real inbox confirmation for the form~~ | **Closed 2026-09-20** — the notification was read back from `hugoyuan2004@gmail.com`. See `docs/form-submission.md`. |

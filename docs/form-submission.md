@@ -104,59 +104,80 @@ What it also found, and this was **not** what the comment claimed:
   visitor without JavaScript it means no validation at all. Logged as a change request;
   not fixed here.
 
-### Where the no-JS submissions were filed, and why that answer is negative
+### Where the no-JS submissions were filed
 
-An earlier revision of this file claimed a clean pattern — fallback submissions go to
-spam, the JavaScript submission did not. Then the discriminating experiment was run: the
-same complete, browser-driven, JavaScript-off submission, several times.
+Two earlier revisions of this section were wrong, in opposite directions, and both times
+the error was the same: a conclusion stated more strongly than the measurements allowed.
+The first called a `302` a delivery. The second claimed the no-JS path goes to spam. What
+follows is the third version, and it is written as a timeline because the answer moved.
 
-Every reading below comes from
-`https://formspree.io/forms/xdekaddz/submissions` (the Inbox tab, then the `Spam (n)`
-tab), read 2026-09-20 between 12:06 and 12:20 UTC. These counts are **not reproducible
-from this repository** and they go stale the moment anyone submits again — every run of
-`tools/nojs-post-check.mjs` adds two more records.
+Everything below is read from `https://formspree.io/forms/xdekaddz/submissions`, from the
+Inbox tab and the `Spam (n)` tab, on 2026-09-20 between 11:50 and 12:25 UTC. **None of it
+is reproducible from this repository**, and every run of `tools/nojs-post-check.mjs` adds
+records to both lists.
 
 ```
-Inbox  Spam (5)
-
-SPAM, all browser-driven, JavaScript off:
-  12:15  No-JS Live Check   nojs-live@example.com   complete
-  12:12  No-JS Live Check   nojs-live@example.com   complete
-  12:11  No-JS Live Check   nojs-live@example.com   complete
-  12:08  No-JS Live Check   nojs-live@example.com   complete
-  12:06  No-JS Check        nojs@example.com        bare Node fetch, no Origin/Referer
-
-INBOX:
-  11:43  Verification Test  hugoyuan2004@gmail.com   JavaScript enabled, from the live site
-  12:13  No-JS Partial      nojs-partial@example.com  no class selected
-  12:13  No-JS Honeypot     nojs-hp@example.com     honeypot filled
-  12:15  No-JS Live Check   nojs-live@example.com   complete
+INBOX                                    SPAM
+11:43  Verification Test  (JS enabled)   ——— nothing before 12:06 ———
+12:13  No-JS Partial                    12:06  No-JS Check   (bare Node fetch)
+12:13  No-JS Honeypot                   12:08  No-JS Live Check
+12:15  No-JS Live Check                 12:11  No-JS Live Check
+12:17  No-JS Live Check                 12:12  No-JS Live Check
+12:20  No-JS Live Check                 12:15  No-JS Live Check
+12:21  SEG-COMPLETE                     12:17  No-JS Live Check
+12:21  SEG-PARTIAL
+12:22  DEDUP-IDENTICAL  (two sent, one row)
 ```
 
-The two `12:13` inbox rows are an independent reviewer's probes: one partial, one with
-the honeypot filled. Both were accepted into the inbox, and the honeypot one did not stop
-the request at all.
+The **inbox and spam lists are separate snapshots that never move.** A record filed to
+spam stays there when a later submission from the same page is accepted, so the two lists
+are not two views of one queue — they are two frozen verdicts. That is why the same
+timestamp, `12:17`, appears in both: two submissions, seconds apart, same payload, split
+across the buckets.
 
-**The claim is withdrawn, not softened.** The `12:15` rows are the same submission, form
-for form, sent twice inside one run of the tool — one was filed inbox, one spam. So:
+Four things are actually established, and one of them is the answer:
 
-- Automation is not the discriminator: the reviewer's scripted probes reached the inbox.
-- Completeness is not the discriminator: the complete no-JS submissions split across both
-  buckets.
-- The honeypot does not block at the request level; a filled `website` still received
-  `302 → /thanks`.
+1. **Every submission was accepted** — `302` to `/thanks` in all cases. Acceptance never
+   varied. Acceptance is also not delivery.
+2. **Very early submissions were filed to spam**: six of them, `12:06` through `12:17`,
+   all from `nojs-live@example.com`, all complete.
+3. **From `12:17` onward, none were.** Six consecutive submissions all landed in the
+   inbox: `12:17`, `12:20`, `12:21` twice, and `12:22` twice-sent-but-stored-once. The
+   `12:17` one is the interesting one, arriving at the same moment as the last spam row.
+4. **The same payload got both verdicts.** A complete submission with the same field values
+   was filed to spam at `12:15` and `12:17`, and reached the inbox at `12:15` and `12:17`,
+   so there is no payload-level rule to find. The dashboard shows minutes, not seconds, so
+   "the same minute" is as close as these readings get.
 
-What is left is a server-side classifier that returned different verdicts for
-near-identical input. That is not something this repository can measure, predict, or fix,
-and no further submission from here would settle it. The honest statement is:
+Two things are **suggested but not established**, and are labelled that way on purpose:
 
-> The no-JS fallback **submits** and the endpoint **accepts** it, verified in a real
-> browser with JavaScript off. Where Formspree files any given submission — inbox or spam
-> — is **non-deterministic as measured**, and must not be described as a property of the
-> no-JS path. No human submission exists on record.
+- **The boundary is not clean.** The partial and honeypot submissions that reached the
+  inbox were at `12:13`, *before* the `12:17` line, which is why the spam and inbox lists
+  overlap in time rather than splitting at a single instant. The honest reading is a
+  transition spread over roughly `12:13`–`12:17`, not a switch that flipped.
+- **Completeness is not the discriminator.** A partial submission at `12:13` reached the
+  inbox while complete ones were still being filed to spam around it. But that partial
+  came from a different submitter, so it is one observation, not a controlled comparison.
 
-The one action that would settle it is the client's: send it once by hand from a real
-browser with JavaScript off, and look at where it lands. That is a person, not a probe.
+The reading that fits all of this is that the service's filter **changed its mind about
+this form during the window**. **Other explanations are not excluded by this data** and it
+would be another overclaim to name one as the mechanism. A per-IP or per-device rate limit
+that tripped and then reset, a reputation change triggered by the accepted submissions
+themselves, or a time-based threshold would all fit the same table. What can be said
+without reaching is the consequence:
+
+> A submission filed as spam is a normal event for a form the service has not learned yet,
+> and it stopped happening. It is **not** a property of the JavaScript-off path, and it is
+> not something to fix in the markup. Nothing in this repository can predict it.
+
+One incidental finding, measured twice: **identical payloads are deduplicated.** Two
+byte-identical submissions sent back to back produced one dashboard row, not two — once
+with the `Identical Pair Probe` payload and once with `DEDUP-IDENTICAL`. That is worth
+knowing before reading any submission count in this file as a count of requests.
+
+The one thing still worth doing is the client's: send it once by hand from a real browser
+with JavaScript off. Not because it will fail, but because nothing here substitutes for a
+real visitor.
 
 ## What is still not verified
 
