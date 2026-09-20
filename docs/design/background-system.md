@@ -309,25 +309,39 @@ information. Nothing about the layout depends on them.
 
 ### The cost, measured
 
-`tools/css-cost.mjs` compares the committed stylesheet with the current one:
+Two readings, because they answer different questions.
+
+**Absolute — what this feature costs, reproducible from the file alone:**
+
+| | raw | gzip | brotli |
+|---|---|---|---|
+| Grid block (token + rules + comments) | **756 B** | 452 B | 352 B |
+| **The rules alone, comments stripped** | **89 B** | 98 B | **76 B** |
+
+The delivering code is **89 bytes raw / 76 bytes brotli**. Everything above that is
+explanation. On a site with a minifier the number would be 76; this site has none, so 352
+is what actually ships.
+
+**Relative — the whole stylesheet, before and after:**
 
 ```
-baseline   raw    9680   gzip   3233   brotli   2676
+baseline   raw    9680   gzip   3233   brotli   2676     (commit before this change)
 current    raw   10991   gzip   3720   brotli   3091
 delta raw    1311 bytes
 delta gzip    487 bytes
 delta brotli  415 bytes
 ```
 
-**+415 bytes brotli** on a first screen that is ≈10 KiB over the wire. GitHub Pages serves
-compressed, so brotli is the number that matters; gzip is shown because some intermediaries
-still use it. That is roughly a 4% increase in first-screen transfer for the entire visual
-hierarchy change.
+`tools/css-cost.mjs` reproduces the relative table by diffing the stylesheet against the
+last commit that touched it. Run it with a clean tree and it prints zeroes — that is
+correct behaviour, not a bug: with the change committed, the baseline *is* the current
+file. To re-measure a future change, run it before committing.
 
-**946 bytes of those 1,311 are comments.** The site has no minifier and ships its comments
-on purpose — they are the reason the stylesheet is maintainable by hand. The rationale
-that used to live inline now lives in this file, which cut the CSS delta from 784 to 415
-bytes brotli without losing any of the reasoning.
+**The lesson worth keeping.** The first cut of this block was written with the full
+rationale inline and cost **+784 brotli** for the same 89 bytes of delivered rules. Moving
+that prose into this document halved the shipped cost without discarding a single
+argument. On a hand-written, unminified stylesheet, **the comments are usually the larger
+half of any diff** — check which half you are actually arguing about.
 
 ### What was not added
 
@@ -397,6 +411,8 @@ treated as its own decision with its own measurement.
 | Rendered pixel evidence | `.page-head`, `ol.steps`, and a class page captured and inspected |
 | Sticky-header seam | Visually confirmed absent on home page and `classes/knife-skills.html` |
 | Overflow at 375px and 1280px | `scrollWidth − clientWidth = 0` in every direction |
+| Deployed | `dist/assets/style.css` and the live stylesheet are **SHA256 identical**; the live file carries `--grid-tile` |
+| Route count | 16 routes local and live, **all 200** |
 
 **Outstanding:** a Lighthouse run against the deployed URL (§7).
 

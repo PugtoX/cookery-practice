@@ -1,7 +1,7 @@
 // Throwaway: what does the added CSS actually cost on the wire?
 // GitHub Pages serves gzip/br, so the uncompressed delta is not the number that
 // matters. Compare the committed stylesheet with the current one at three levels.
-import { readFileSync, writeFileSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { gzipSync, brotliCompressSync, constants } from 'node:zlib'
 import { execFileSync } from 'node:child_process'
 
