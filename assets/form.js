@@ -11,11 +11,13 @@ import { validate } from './validate.js'
 const form = document.getElementById('callback')
 const status = document.getElementById('form-status')
 
-// The endpoint the markup points at. Submitting with JavaScript disabled posts
-// straight here, so this is only consulted to decide whether the form is actually
-// connected yet.
+// The endpoint the markup points at. Submitting without JavaScript posts straight
+// here, so this is only consulted to decide whether the form is actually connected.
+// The check is "is it a usable absolute URL", not "does it still contain a placeholder
+// string" — the earlier version keyed off the literal REPLACE_ME, which would have
+// silently stopped guarding anything the moment the real id was pasted in.
 const ENDPOINT = form?.getAttribute('action') ?? ''
-const NOT_CONFIGURED = !ENDPOINT || ENDPOINT.includes('REPLACE_ME')
+const NOT_CONFIGURED = !/^https?:\/\/\S+$/i.test(ENDPOINT)
 
 function showFieldErrors(errors) {
   for (const field of form.querySelectorAll('input, select, textarea')) {

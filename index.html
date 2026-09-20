@@ -197,14 +197,14 @@
             <a href="contact.html">contact page</a> has our email and phone number.
           </p>
 
-          <!-- The action is a real endpoint, not a decorative one — but it ships as a
-               placeholder, so it is NOT connected yet. Until REPLACE_ME is swapped for a
-               real Formspree id, submitting cannot deliver anything, with or without
-               JavaScript, and the script says so rather than pretending. See README. -->
+          <!-- The action is a real endpoint. Submitting with JavaScript disabled still
+               POSTs here and still delivers — the script only adds validation and the
+               failure states. Form id is public by design: it ships in every page that
+               posts to it, so it is not a secret. -->
           <form
             id="callback"
             method="POST"
-            action="https://formspree.io/f/REPLACE_ME"
+            action="https://formspree.io/f/xdekaddz"
             novalidate
           >
             <div class="form-field">

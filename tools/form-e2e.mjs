@@ -165,9 +165,14 @@ try {
 
   // ---------- green path ----------
   await page.goto(pageUrl, { waitUntil: 'networkidle0' })
+  // The shipped action must be a real Formspree endpoint, not a placeholder. This
+  // assertion used to check for the literal REPLACE_ME while the form was unconnected;
+  // once the real id was pasted in, that assertion failed on a correct site. What
+  // actually matters is that the shipped page points at a usable endpoint — the test
+  // then redirects that endpoint to the sink, so it never posts to the live form.
   check(
-    'the shipped page still carries a replaceable placeholder action',
-    servedAction !== null && servedAction.includes('REPLACE_ME'),
+    'the shipped page carries a real form endpoint',
+    servedAction !== null && /^https:\/\/formspree\.io\/f\/[A-Za-z0-9]+$/.test(servedAction),
     `shipped action = ${servedAction}`,
   )
   await fillValid()

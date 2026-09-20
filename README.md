@@ -125,21 +125,23 @@ The form on the home page posts to **Formspree**. Every field is validated in th
 browser first, but that is not what makes it work — the `action` attribute is. Even
 with JavaScript switched off, a submission goes to whatever that attribute names.
 
-**It ships disconnected**, so at the moment nothing is delivered either way. The action
-is:
+**It is connected.** The action is:
 
 ```
-https://formspree.io/f/REPLACE_ME
+https://formspree.io/f/xdekaddz
 ```
 
-To connect it:
+Submissions arrive at the account that owns that form. To point it somewhere else:
 
-1. Create a free Formspree account (50 submissions a month on the free tier) and a
-   new form; point it at the inbox that should receive requests.
-2. Replace `REPLACE_ME` in `index.html` with the form id.
+1. Create a form in that Formspree account (50 submissions a month on the free tier)
+   and add the destination inbox under Linked Emails.
+2. Replace the form id in the `action` attribute in `index.html` — the id is the last
+   path segment, `xdekaddz` in the URL above.
 3. Submit it once for real and confirm the message arrives. Do not skip this — a form
    that looks like it worked but goes nowhere is worse than no form at all, because
    the visitor believes they have been in touch.
+
+The form id is not a secret: it ships in the HTML of every page that posts to it.
 
 Until the id is replaced, the page says so plainly rather than pretending to send.
 
