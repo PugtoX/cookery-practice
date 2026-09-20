@@ -37,10 +37,13 @@ browser has it" are different claims:
 | Payload used | name `Verification Test`, contact `hugoyuan2004@gmail.com`, interest `Pasta From Scratch`, notes "Automated end-to-end check of the callback form on the live site. Safe to delete." |
 
 Read back from the Formspree dashboard at
-`https://formspree.io/forms/xdekaddz/submissions` (not from this project's own files):
+`https://formspree.io/forms/xdekaddz/submissions` (not from this project's own files).
+This is one reading, taken 2026-09-20 shortly after 11:43 UTC; the `Spam (0)` is a count
+at that instant, not a property of this submission — later test submissions raised it, and
+the section below records what happened when they did.
 
 ```
-Inbox   Spam (0)          <- count at the time of this reading
+Inbox   Spam (0)          <- count at the time of this reading, 2026-09-20 ~11:50 UTC
 _date                    Sep 20, 11:43
 name                     Verification Test
 contact                  hugoyuan2004@gmail.com
@@ -85,7 +88,7 @@ application/x-www-form-urlencoded` and all five fields — `name`, `contact`, `i
 `notes`, `website` — with the honeypot empty. The typing and the submit themselves go
 through native browser input, not an injected script: filling a form with `page.evaluate`
 while claiming JavaScript is off would put the harness, not the fallback, under test.
-15/15 checks pass.
+17/17 checks pass.
 
 What it also found, and this was **not** what the comment claimed:
 
@@ -93,26 +96,73 @@ What it also found, and this was **not** what the comment claimed:
   `https://formspree.io/thanks?language=zh` and the visitor lands on **Formspree's own
   success page**, in whatever language their browser asks for — not on ours. Our page
   never gets to render its confirmation, and there is no link back to the site.
-- The dashboard's `Spam` count went `0 → 1` after a bare Node `fetch()` POST and
-  `1 → 2` after the browser no-JS runs: **the fallback submissions were filed as spam**,
-  while the JavaScript-enabled submission at 11:43 was not.
+- `index.html` carries `novalidate`, so on the no-JS path the browser's own
+  `required`-field check does **not** run. Measured: with only the name and contact
+  filled and no class selected, `form.checkValidity()` is `false` and the click still
+  submits — the endpoint accepted it and recorded a submission with an empty class
+  column. `novalidate` is deliberate so `form.js` can own the error messages, but for a
+  visitor without JavaScript it means no validation at all. Logged as a change request;
+  not fixed here.
 
-The second point has a known cause for the Node case (no `Origin`, no `Referer` — a
-signature no real browser produces) and no confirmed cause for the browser case. The
-browser runs were automated and headless, which is itself a plausible trigger. So the
-honest statement is narrow:
+### Where the no-JS submissions were filed, and why that answer is negative
+
+An earlier revision of this file claimed a clean pattern — fallback submissions go to
+spam, the JavaScript submission did not. Then the discriminating experiment was run: the
+same complete, browser-driven, JavaScript-off submission, several times.
+
+Every reading below comes from
+`https://formspree.io/forms/xdekaddz/submissions` (the Inbox tab, then the `Spam (n)`
+tab), read 2026-09-20 between 12:06 and 12:20 UTC. These counts are **not reproducible
+from this repository** and they go stale the moment anyone submits again — every run of
+`tools/nojs-post-check.mjs` adds two more records.
+
+```
+Inbox  Spam (5)
+
+SPAM, all browser-driven, JavaScript off:
+  12:15  No-JS Live Check   nojs-live@example.com   complete
+  12:12  No-JS Live Check   nojs-live@example.com   complete
+  12:11  No-JS Live Check   nojs-live@example.com   complete
+  12:08  No-JS Live Check   nojs-live@example.com   complete
+  12:06  No-JS Check        nojs@example.com        bare Node fetch, no Origin/Referer
+
+INBOX:
+  11:43  Verification Test  hugoyuan2004@gmail.com   JavaScript enabled, from the live site
+  12:13  No-JS Partial      nojs-partial@example.com  no class selected
+  12:13  No-JS Honeypot     nojs-hp@example.com     honeypot filled
+  12:15  No-JS Live Check   nojs-live@example.com   complete
+```
+
+The two `12:13` inbox rows are an independent reviewer's probes: one partial, one with
+the honeypot filled. Both were accepted into the inbox, and the honeypot one did not stop
+the request at all.
+
+**The claim is withdrawn, not softened.** The `12:15` rows are the same submission, form
+for form, sent twice inside one run of the tool — one was filed inbox, one spam. So:
+
+- Automation is not the discriminator: the reviewer's scripted probes reached the inbox.
+- Completeness is not the discriminator: the complete no-JS submissions split across both
+  buckets.
+- The honeypot does not block at the request level; a filled `website` still received
+  `302 → /thanks`.
+
+What is left is a server-side classifier that returned different verdicts for
+near-identical input. That is not something this repository can measure, predict, or fix,
+and no further submission from here would settle it. The honest statement is:
 
 > The no-JS fallback **submits** and the endpoint **accepts** it, verified in a real
-> browser. Whether Formspree files a genuine no-JS visitor's submission to the inbox or
-> to spam is **not established** — automated submissions were filed as spam, and there
-> is no human no-JS submission on record.
+> browser with JavaScript off. Where Formspree files any given submission — inbox or spam
+> — is **non-deterministic as measured**, and must not be described as a property of the
+> no-JS path. No human submission exists on record.
 
-Two fixes are available and neither is applied, because both are the client's call:
-configure a custom redirect so a no-JS sender returns to this site after sending, and
-send one real no-JS submission by hand from a browser with JavaScript off to see where
-it lands.
+The one action that would settle it is the client's: send it once by hand from a real
+browser with JavaScript off, and look at where it lands. That is a person, not a probe.
 
 ## What is still not verified
 
 **That a real visitor using a real phone has used this form.** Every submission here was
 automated. There is no human submission on record and no real-device test on any phone.
+
+**Whether the honeypot suppresses anything downstream.** It demonstrably does not stop
+the request reaching Formspree. Whether the service then discards a flagged submission is
+not visible from here; the form exposes no spam settings.

@@ -95,11 +95,12 @@ needs `npm i -D --no-save puppeteer-core` first.
 `assets/form.js` calls `preventDefault()` — a native form POST only happens when the
 module never loads, so this path cannot be tested any other way. It checks the
 `method="POST"` attribute, that the native POST leaves with all five fields and an empty
-honeypot, and then submits once to the real endpoint to see where a JavaScript-off
-visitor actually ends up. **It is not a delivery test**: whether a submission reaches the
-inbox is decided server-side and has to be read from the form dashboard — see
-`docs/form-submission.md`, which records both a real delivery and the one thing a `302`
-does not prove. This tool sends two live submissions each run.
+honeypot, and then submits to the real endpoint twice — once complete, once partial — to
+see where a JavaScript-off visitor actually ends up. **It is not a delivery test**:
+whether a submission reaches the inbox is decided server-side, and as measured it is not
+even consistent — the same complete submission was filed both ways inside one run. Read
+`docs/form-submission.md` for what was actually observed. This tool sends three live
+submissions each run and adds records to the form's dashboard.
 
 To regenerate the social preview image after editing `assets/og.svg`:
 

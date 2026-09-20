@@ -99,11 +99,11 @@ await new Promise((r) => server.listen(0, '127.0.0.1', r))
 const localUrl = `http://127.0.0.1:${server.address().port}${BASE}`
 
 // ------------------------------------------------------------------- browser
-const browser = await puppeteer.launch({
-  executablePath: chrome,
-  headless: true,
-  args: ['--no-sandbox', '--disable-dev-shm-usage'],
-})
+// Launched inside the try below. Launching it before the try meant that a Chrome which
+// is installed but refuses to start threw from the finally block instead ("Cannot access
+// 'browser' before initialization"), hiding the real reason and leaving the two servers
+// listening.
+let browser = null
 
 const results = []
 let failures = 0
@@ -120,7 +120,67 @@ const expectedFields = [
   ...shipped.matchAll(/<(?:input|select|textarea)\b[^>]*\bname="([^"]+)"/g),
 ].map((m) => m[1])
 
+// Derived from the markup, so it can silently resolve to nothing if the regex stops
+// matching (a quote-style edit does it). An empty list would make every field assertion
+// below pass vacuously, so refuse to run rather than report a green that means nothing.
+if (expectedFields.length < 5) {
+  console.error(`[precondition] read only ${expectedFields.length} field name(s) from ${join(dist, 'index.html')}: ${JSON.stringify(expectedFields)}`)
+  server.close()
+  sink.close()
+  process.exit(2)
+}
+
+// One native submit to the real endpoint with JavaScript off, so we can see where a
+// JavaScript-off visitor is actually taken. `fields` decides how much gets typed.
+async function liveSubmit(label, fields) {
+  const page = await browser.newPage()
+  await page.setJavaScriptEnabled(false)
+  const traffic = []
+  page.on('response', (r) => {
+    const u = r.url()
+    if (u.startsWith('https://formspree.io/')) traffic.push(`${r.status()} ${u}`)
+  })
+  await page.goto(LIVE_ORIGIN, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  const hasForm = (await page.$('#callback')) !== null
+  if (!hasForm) {
+    record(`${label}: form present on deployed page`, false, 'no #callback on the live page')
+    await page.close()
+    return null
+  }
+  if (fields.name) await page.type('#name', 'No-JS Live Check')
+  if (fields.contact) await page.type('#contact', 'nojs-live@example.com')
+  if (fields.interest) await page.select('#interest', 'Pasta From Scratch')
+  if (fields.notes) await page.type('#notes', 'Deployed-site native submit, JavaScript disabled. Safe to delete.')
+  const method = await page.$eval('#callback', (f) => f.getAttribute('method'))
+  record(`${label}: deployed form method is POST`, (method ?? '').toUpperCase() === 'POST', `method=${method}`)
+  // index.html carries novalidate, so the browser's own required-field check will NOT
+  // stop a partial submission. Measured here rather than assumed.
+  const nativeWouldBlock = await page.$eval('#callback', (f) => !f.checkValidity())
+  const nav = page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 20000 }).then(() => true).catch(() => false)
+  await page.click('button[type="submit"]')
+  await nav
+  await sleep(1500)
+  const landed = page.url()
+  const body = await page.evaluate(() => (document.body?.innerText ?? '').slice(0, 400)).catch(() => '')
+  console.log(`      ${label}: ${traffic.join(' | ') || '(no formspree request seen)'}`)
+  console.log(`      ${label}: landed on ${landed}`)
+  record(`${label}: submission left the browser for formspree`, traffic.length > 0, traffic.join(' | ') || 'no request observed')
+  record(
+    `${label}: endpoint accepted it`,
+    /formspree\.io\/thanks/.test(landed) || /submitted successfully/i.test(body),
+    /formspree\.io\/thanks/.test(landed) ? landed : body.replace(/\s+/g, ' ').slice(0, 80),
+  )
+  await page.close()
+  return { landed, body, traffic, nativeWouldBlock }
+}
+
 try {
+  browser = await puppeteer.launch({
+    executablePath: chrome,
+    headless: true,
+    args: ['--no-sandbox', '--disable-dev-shm-usage'],
+  })
+
   // ---- LOCAL: JavaScript disabled, native submit, body recorded
   const off = await browser.newPage()
   await off.setJavaScriptEnabled(false)
@@ -155,9 +215,11 @@ try {
   await sleep(500)
 
   record('no-JS: browser navigated (native submit happened)', navigated, navigated ? '' : 'no navigation')
-  // Count POSTs only: the browser also GETs the action URL while loading the form,
-  // because requestSubmit() resolves the action. Counting the whole array made a
-  // correct submission look like a double-send the first time this ran.
+  // Count POSTs only. The sink also receives the browser's automatic GET /favicon.ico,
+  // because the form's action points at it and Chrome asks that origin for an icon.
+  // An earlier comment here claimed the extra request was requestSubmit() resolving the
+  // action with a GET — it is not, and requestSubmit() never GETs the action. Measured
+  // by logging req.url at the sink.
   const posts = received.filter((r) => r.method === 'POST')
   record('no-JS: sink received exactly one POST', posts.length === 1, `posts=${posts.length} of ${received.length} requests`)
   if (posts.length > 0) {
@@ -175,50 +237,24 @@ try {
   await off.close()
 
   // ---- LIVE: the deployed site, JavaScript disabled, real endpoint
-  const live = await browser.newPage()
-  await live.setJavaScriptEnabled(false)
-  const liveText = []
-  live.on('response', (r) => {
-    const u = r.url()
-    if (u.startsWith('https://formspree.io/')) liveText.push(`${r.status()} ${u}`)
-  })
-  await live.goto(LIVE_ORIGIN, { waitUntil: 'domcontentloaded', timeout: 30000 })
-  const liveHasForm = (await live.$('#callback')) !== null
-  if (!liveHasForm) {
-    record('live: form present on deployed page', false, 'no #callback on the live page')
-  } else {
-    await live.type('#name', 'No-JS Live Check')
-    await live.type('#contact', 'nojs-live@example.com')
-    await live.select('#interest', 'Pasta From Scratch')
-    await live.type('#notes', 'Deployed-site native submit, JavaScript disabled. Safe to delete.')
-    const liveMethod = await live.$eval('#callback', (f) => f.getAttribute('method'))
-    record('live: deployed form method is POST', (liveMethod ?? '').toUpperCase() === 'POST', `method=${liveMethod}`)
-    const liveNav = live
-      .waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 20000 })
-      .then(() => true)
-      .catch(() => false)
-    await live.click('button[type="submit"]')
-    await liveNav
-    await sleep(1500)
-    const landed = live.url()
-    const body = await live.evaluate(() => (document.body?.innerText ?? '').slice(0, 400)).catch(() => '')
-    console.log(`      formspree responses: ${liveText.join(' | ') || '(none seen)'}`)
-    console.log(`      landed on: ${landed}`)
-    record('live: submission left the browser for formspree', liveText.length > 0, liveText.join(' | ') || 'no request observed')
-    record('live: landed on the service success page', /formspree\.io\/thanks/.test(landed), landed)
-    // A native submit cannot be answered in-place, so the service takes the visitor to
-    // its own /thanks page. This site does not get to render the confirmation, and with
-    // no custom redirect configured the visitor has no way back except the back button.
-    // Recorded as a measured fact; see docs/form-submission.md.
-    record(
-      'live: no-JS visitor is shown a success page',
-      /submitted successfully/i.test(body),
-      body.replace(/\s+/g, ' ').slice(0, 80),
+  //
+  // Two probes, because they are the experiment that separates two explanations for the
+  // spam filing observed earlier: "the submission came from automation" versus "the
+  // submission was incomplete". The complete one matches Submission 1 in
+  // docs/form-submission.md, which was accepted — so if the complete no-JS probe is also
+  // accepted, automation alone is not what the service objects to.
+  const liveFull = await liveSubmit('live-full', { name: true, contact: true, interest: true, notes: true })
+  const livePartial = await liveSubmit('live-partial', { name: true, contact: true, interest: false, notes: false })
+  if (livePartial) {
+    // Not a site defect by itself — novalidate is deliberate so form.js can own the error
+    // messages. It IS a real gap for a JavaScript-off visitor, and it is recorded so the
+    // person deciding whether to keep novalidate can see the cost. See change-requests.md.
+    console.log(
+      `      live-partial: browser's own validity check would have blocked that submit: ${livePartial.nativeWouldBlock}`,
     )
   }
-  await live.close()
 } finally {
-  await browser.close()
+  if (browser) await browser.close()
   server.close()
   sink.close()
 }
