@@ -82,6 +82,7 @@ GitHub Pages cannot issue for you.
 npm test                        # validation rules, Node's built-in runner
 npm run build && node tools/link-check.mjs   # broken links and missing assets in dist/
 npm run build && node tools/form-e2e.mjs     # the form's real submission path, in a browser
+npm run build && node tools/nojs-post-check.mjs  # the fallback when JavaScript is blocked
 ```
 
 `form-e2e` drives a headless Chrome: it serves `dist/`, points the form at a local sink,
@@ -89,6 +90,16 @@ and asserts that a valid submission produces a real POST carrying every field, t
 success state appears, that the cooldown blocks a second send, that a 500 produces an
 error rather than a fake success, and that an empty form never reaches the network. It
 needs `npm i -D --no-save puppeteer-core` first.
+
+`nojs-post-check` also drives Chrome, but with JavaScript switched off, because
+`assets/form.js` calls `preventDefault()` — a native form POST only happens when the
+module never loads, so this path cannot be tested any other way. It checks the
+`method="POST"` attribute, that the native POST leaves with all five fields and an empty
+honeypot, and then submits once to the real endpoint to see where a JavaScript-off
+visitor actually ends up. **It is not a delivery test**: whether a submission reaches the
+inbox is decided server-side and has to be read from the form dashboard — see
+`docs/form-submission.md`, which records both a real delivery and the one thing a `302`
+does not prove. This tool sends two live submissions each run.
 
 To regenerate the social preview image after editing `assets/og.svg`:
 
@@ -192,6 +203,7 @@ tools/                                   build, preview, link check, form e2e, g
 tools/emit-page.mjs                      shared shell for the generated pages
 tools/gen-*.mjs                          one-off generators (see below)
 tools/form-e2e.mjs                       drives a browser through the form's real path
+tools/nojs-post-check.mjs                the same form with JavaScript disabled
 tests/validate.test.js                   13 tests for the form rules
 .github/workflows/deploy-pages.yml       push to main -> build -> deploy
 ```
