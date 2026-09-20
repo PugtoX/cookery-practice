@@ -113,6 +113,21 @@ technically indexable.**
 | 10 | Handover note | `README.md` covering hosting, DNS, form, where things live, how to edit a page | Clean-environment test: instructions only, no source reading |
 | 11 | Domain / email runbook | Exact DNS records + the ordered swap steps, written down | Documented; **execution recorded as unverified** (no domain owned) |
 
+### Delivery budget (numbers agreed before the build, not measured after it)
+
+The client's visitors open this on a phone, so size and stability are part of the
+scope rather than a post-launch observation. Agreed limits:
+
+| Measure | Budget | Why this number |
+|---|---|---|
+| First-load transfer | **≤ 200 KiB** | Under a second on a slow mobile connection; the sibling project measures 125 KiB, so this leaves room without being aspirational |
+| Single image | **≤ 100 KB** | A larger one is a defect unless someone writes down why |
+| Total Blocking Time | **≤ 200 ms** | Above this the page feels unresponsive on a mid-range Android |
+| Cumulative Layout Shift | **≤ 0.1** | Below this, content does not visibly jump as it loads |
+
+A page that breaks one of these is not finished, and the measurement is taken on the
+live URL rather than locally — local results and deployed results differ.
+
 ### Explicitly out of scope for the client's money (matches his "important" note)
 
 - Keyword research, link building, copywriting, SEO marketing

@@ -80,7 +80,18 @@ GitHub Pages cannot issue for you.
 ```bash
 npm test                        # validation rules, Node's built-in runner
 npm run build && node tools/link-check.mjs   # broken links and missing assets in dist/
+npm run build && node tools/form-e2e.mjs     # the form's real submission path, in a browser
 ```
+
+`form-e2e` drives a headless Chrome: it serves `dist/`, points the form at a local sink,
+and asserts that a valid submission produces a real POST carrying every field, that the
+success state appears, that the cooldown blocks a second send, that a 500 produces an
+error rather than a fake success, and that an empty form never reaches the network. It
+needs `npm i -D --no-save puppeteer-core` first.
+
+**It cannot tell you the message arrived in an inbox** — the endpoint it posts to is a
+local one it starts itself. A real submission to the real form id, checked at the
+receiving end, is still required and is not claimed anywhere in this project.
 
 Two more checks live in the workflow this project came from and are run from there,
 because they are shared across projects rather than owned by this one:
@@ -165,9 +176,10 @@ assets/form.js  assets/validate.js       form wiring, and the rules on their own
 assets/og.svg                            social preview image (1200x630)
 public/robots.txt                        copied to the site root at build time
 site.config.yml                          the domain — the only place it appears
-tools/                                   build, preview, link check, generators
+tools/                                   build, preview, link check, form e2e, generators
 tools/emit-page.mjs                      shared shell for the generated pages
 tools/gen-*.mjs                          one-off generators (see below)
+tools/form-e2e.mjs                       drives a browser through the form's real path
 tests/validate.test.js                   13 tests for the form rules
 .github/workflows/deploy-pages.yml       push to main -> build -> deploy
 ```
