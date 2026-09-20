@@ -197,10 +197,15 @@
             <a href="contact.html">contact page</a> has our email and phone number.
           </p>
 
-          <!-- The action is a real endpoint. Submitting with JavaScript disabled still
-               POSTs here and still delivers — the script only adds validation and the
-               failure states. Form id is public by design: it ships in every page that
-               posts to it, so it is not a secret. -->
+          <!-- The action is a real endpoint, and method="POST" is what carries the
+               submission. With the script running it preventDefaults and posts with
+               fetch(), so the confirmation is shown on this page. With the script
+               blocked the browser does a native form POST and Formspree takes the
+               visitor to its own success page instead — the request still arrives,
+               but our page no longer controls what is displayed afterwards.
+               Measured both ways in tools/nojs-post-check.mjs.
+               Form id is public by design: it ships in every page that posts to it,
+               so it is not a secret. -->
           <form
             id="callback"
             method="POST"
