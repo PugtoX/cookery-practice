@@ -1,0 +1,12 @@
+{
+  "name": "cookery-practice",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Multi-page static HTML cookery site — deployment + technical SEO practice run",
+  "scripts": {
+    "dev": "node tools/serve.mjs",
+    "build": "node tools/build.mjs",
+    "test": "node --test \"tests/**/*.test.js\""
+  }
+}

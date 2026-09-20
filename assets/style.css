@@ -1,0 +1,485 @@
+/* Cookery class site — hand-written CSS, no framework, no build step.
+   Palette: "Herb Garden" (candidate G in web-gzliu/palettes/index.html).
+   Body text and secondary text both measured >= 4.5:1 against --page and --panel
+   by web-gzliu/contrast-check.mjs; change a colour here and re-run it, because
+   the numbers recorded in that page go stale the moment this file changes.
+
+   Mobile first. 375px is the declared minimum width, not a "nice to have":
+   layout-check.mjs opens every page at 375px and fails on horizontal scroll.
+   Every interactive control is at least 44px tall (Apple HIG / WCAG 2.1 SC
+   2.5.5) — that is what viewport-check.mjs measures, and it is stricter than
+   axe's 24px target-size rule, so axe passing does not mean this passes. */
+
+:root {
+  --accent: #3f6212;
+  --accent-soft: rgba(63, 98, 18, 0.1);
+  --page: #f7f8f3;
+  --panel: #ffffff;
+  --panel-hover: #f1f4ea;
+  --line: #e2e6d8;
+  --line-strong: #cbd3bb;
+  --fg: #12180f;
+  --muted: #57614b;
+  --grid: rgba(18, 24, 15, 0.05);
+
+  --measure: 34rem;
+  --step-0: 1rem;
+  --step-1: 1.125rem;
+  --step-2: 1.375rem;
+  --step-3: 1.75rem;
+  --step-4: 2.125rem;
+  --radius: 10px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.6;
+}
+
+/* Nothing may create horizontal scroll. Long words and unbreakable strings
+   (a pasted URL in a form, an email address in the footer) are the usual cause,
+   so they wrap rather than push the page wider than 375px. */
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Layout ---------- */
+
+.wrap {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 0 var(--step-0);
+}
+
+/* The skip link is off-screen until focused, but it still has a box, so it is a
+   measurable touch target whether or not a user ever focuses it. Measured 117x26
+   before this rule. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+}
+
+.skip-link:focus {
+  left: var(--step-0);
+  top: var(--step-0);
+  z-index: 10;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--page);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-header .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--step-0);
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 700;
+  font-size: var(--step-1);
+  color: var(--fg);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+.site-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9375rem;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current='page'] {
+  color: var(--fg);
+}
+
+.site-nav a[aria-current='page'] {
+  font-weight: 600;
+}
+
+/* ---------- Typography ---------- */
+
+h1,
+h2,
+h3 {
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin: 0 0 var(--step-0);
+}
+
+h1 {
+  font-size: var(--step-4);
+}
+
+h2 {
+  font-size: var(--step-3);
+}
+
+h3 {
+  font-size: var(--step-2);
+}
+
+p {
+  margin: 0 0 var(--step-0);
+  overflow-wrap: break-word;
+}
+
+.lede {
+  font-size: var(--step-1);
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.eyebrow {
+  font-size: 0.8125rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+/* ---------- Sections ---------- */
+
+section {
+  padding: var(--step-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+section:last-of-type {
+  border-bottom: 0;
+}
+
+.page-head {
+  padding-top: var(--step-3);
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: var(--radius);
+  font-size: var(--step-0);
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+}
+
+.btn:hover {
+  background: #2f4a0d;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--line-strong);
+}
+
+.btn-ghost:hover {
+  background: var(--panel-hover);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: var(--step-1) 0 0;
+}
+
+/* ---------- Cards and lists ---------- */
+
+.cards {
+  display: grid;
+  gap: var(--step-0);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--step-1);
+}
+
+.card h3 {
+  margin-bottom: 6px;
+}
+
+.card p:last-child {
+  margin-bottom: 0;
+}
+
+/* The whole card is a link, so the target is far bigger than the text. */
+.card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-link:hover h3 {
+  text-decoration: underline;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 3px 10px;
+  margin-bottom: 10px;
+}
+
+.facts {
+  margin: 0;
+  padding: 0;
+}
+
+.facts > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px var(--step-0);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.facts dt {
+  font-weight: 600;
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* ---------- Steps (how a class runs) ---------- */
+
+ol.steps {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+ol.steps li {
+  margin-bottom: 10px;
+}
+
+/* ---------- Form ---------- */
+
+.form-field {
+  margin: 0 0 var(--step-1);
+}
+
+.form-field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.form-field .hint {
+  display: block;
+  font-weight: 400;
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='tel'],
+select,
+textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--fg);
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+input[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+  border-color: #b91c1c;
+  border-width: 2px;
+}
+
+/* Honeypot: hidden from people, still reachable by naive bots. Not display:none
+   plus aria-hidden is belt and braces — see viewport-check.mjs, which skips
+   anything inside [aria-hidden="true"] precisely because that is unreachable. */
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.field-error {
+  color: #b91c1c;
+  font-size: 0.9375rem;
+  margin: 6px 0 0;
+}
+
+.form-status {
+  margin-top: var(--step-1);
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+}
+
+.form-status[data-state='error'] {
+  border-color: #b91c1c;
+  color: #7f1d1d;
+}
+
+.form-status[data-state='ok'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: var(--step-3) 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.site-footer h2 {
+  font-size: 1rem;
+  color: var(--fg);
+}
+
+.site-footer ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer li a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.site-footer .legal {
+  margin-top: var(--step-1);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--step-1);
+}
+
+/* The footer's own links must clear 44px in BOTH dimensions: they are standalone
+   targets, not links inside a sentence, so the WCAG SC 2.5.5 inline exception does
+   not apply. viewport-check.mjs fails on these. Measured: without the horizontal
+   padding "Privacy"/"Terms" came out 42px wide — 2px under — which is exactly the
+   kind of miss that eye-balling does not catch. */
+.site-footer .legal a {
+  display: inline-block;
+  /* inline-block, not inline-flex: an inline-flex box letting the flex container
+     dictate its cross size came out 42px wide on one run and 44px on another.
+     A block-level box sizes to its own content, so the measurement is stable. */
+  line-height: 44px;
+  height: 44px;
+  padding: 0 4px;
+}
+
+/* A standalone link that is NOT inside a sentence (contact details in a facts list,
+   a "see the class" link on its own line). Same reasoning as the footer links. */
+.link-block {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}

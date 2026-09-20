@@ -1,0 +1,12 @@
+# One place to change when the site moves to its own domain.
+#
+# Stage 9 of web-gzliu/workflow.md replaces a `*.github.io/<repo>/` sub-path with the
+# client's own domain. Every absolute URL on this site is derived from `origin` below
+# — canonical links, og:url, og:image, sitemap.xml and the robots.txt Sitemap line —
+# so the swap is this file plus a rebuild, and `seo-check.mjs` then re-run. It checks
+# exactly the "changed half of it" mistake: canonical updated but og:url left behind.
+#
+# Sub-path deployments keep the sub-path in the origin (that is what makes canonical
+# self-referential and correct). Moving to a root domain means dropping it here AND
+# deleting one entry from SITE.localOrigins in tools/serve.mjs.
+origin: https://pugtox.github.io/cookery-practice/

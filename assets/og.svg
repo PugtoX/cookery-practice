@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Cookery Class — hands-on cooking classes in Sydney">
+  <rect width="1200" height="630" fill="#f7f8f3" />
+  <rect x="0" y="0" width="1200" height="14" fill="#3f6212" />
+  <g font-family="ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif">
+    <text x="80" y="120" font-size="30" letter-spacing="6" fill="#57614b">SYDNEY · HANDS-ON KITCHEN</text>
+    <text x="80" y="270" font-size="86" font-weight="700" fill="#12180f">Cookery Class</text>
+    <text x="80" y="360" font-size="42" fill="#3f6212">Small-group cooking classes</text>
+    <text x="80" y="470" font-size="34" fill="#57614b">Knife skills · Bread · Pasta · Market table</text>
+    <text x="80" y="545" font-size="30" fill="#57614b">Eight people to a class. You eat what you make.</text>
+  </g>
+  <g fill="#3f6212" opacity="0.12">
+    <circle cx="1020" cy="180" r="150" />
+    <circle cx="1100" cy="430" r="90" />
+  </g>
+</svg>

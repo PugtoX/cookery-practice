@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pugtox.github.io/cookery-practice/sitemap.xml

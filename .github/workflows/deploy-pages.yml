@@ -1,0 +1,50 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      # There is no `npm ci` step on purpose: this project has no dependencies.
+      # The site is plain HTML and CSS, so the build only copies files and writes
+      # sitemap.xml from site.config.yml. Keeping it dependency-free is what lets
+      # the whole thing be rebuilt years from now without a lockfile archaeology.
+      - run: npm test
+      - run: npm run build
+      - run: node tools/link-check.mjs
+
+      # Requires Settings > Pages > Source to be set to "GitHub Actions".
+      # Enabling that automatically needs a PAT rather than the default
+      # GITHUB_TOKEN, so the one-time switch is done by hand.
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
