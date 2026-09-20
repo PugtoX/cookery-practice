@@ -1,8 +1,9 @@
-Hosting — GitHub Pages. Your site is about 30 static files with no build step, so all
-three platforms you listed would do the job. I would pick GitHub Pages because the
-deploy, the HTTPS certificate and the repository live in one place and it has no
-bandwidth or build-minute metering. If you would rather stay on Cloudflare, that is
-fine — I have no dependency on the platform, and I will check the canonical tags
+Hosting — GitHub Pages. Your site is about 30 static files, so all three platforms you
+listed would do the job. I would pick GitHub Pages because the deploy, the HTTPS
+certificate and the repository live in one place, and because the deploy step simply
+publishes a folder of files rather than running an application: what the sitemap and
+canonical tags claim is what the server returns. If you would rather stay on Cloudflare,
+that is fine — I have no dependency on the platform, and I will check the canonical tags
 against whatever the host actually serves.
 
 Email — Cloudflare Email Routing for receiving, forwarding anything@learntocook.au into
@@ -17,8 +18,8 @@ Plain HTML and CSS, no framework, deployed from GitHub on every push. Eleven pag
 with its own canonical URL, a reachable sitemap and robots.txt, no accidental noindex,
 internal links and images all resolving, headings and form fields checked, and measured
 at a 375px viewport. A real-device check on that site is still outstanding and I will do
-one before handing yours over. Its form is wired but not yet connected to a mailbox, so
-it says so rather than pretending to send.
+one before handing yours over. Its form is wired but not connected to a mailbox yet, and
+its script says so on submit rather than pretending to send.
 
 Technical SEO and indexing readiness — yes. I understand it is the deliverable, not an
 extra. In practice for your site: every important page crawlable and indexable, one

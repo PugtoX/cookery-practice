@@ -114,9 +114,9 @@ a {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0 var(--step-0);
-  padding-top: 6px;
-  padding-bottom: 6px;
+  gap: 0 8px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .brand {
@@ -124,7 +124,7 @@ a {
   align-items: center;
   min-height: 44px;
   font-weight: 700;
-  font-size: var(--step-1);
+  font-size: 1rem;
   color: var(--fg);
   text-decoration: none;
   letter-spacing: -0.01em;
@@ -139,14 +139,20 @@ a {
   list-style: none;
 }
 
+/* Measured at 375px: with 12px side padding and a 0.9375rem font the brand and the
+   five nav links did not fit on one line, so the header wrapped to two rows and the
+   sticky header permanently covered 145px of a 667px viewport — 22%. Nothing in the
+   acceptance criteria catches that (no horizontal scroll, every target 44px), which
+   is exactly why it was measured. Tightening the padding and the link size brings it
+   back to one row; the tap targets stay 44px tall. */
 .site-nav a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 0 12px;
+  padding: 0 8px;
   color: var(--muted);
   text-decoration: none;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
 }
 
 .site-nav a:hover,
