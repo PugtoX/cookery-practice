@@ -1,10 +1,9 @@
 Hosting — GitHub Pages. Your site is about 30 static files, so all three platforms you
 listed would do the job. I would pick GitHub Pages because the deploy, the HTTPS
-certificate and the repository live in one place, and because the deploy step simply
-publishes a folder of files rather than running an application: what the sitemap and
-canonical tags claim is what the server returns. If you would rather stay on Cloudflare,
-that is fine — I have no dependency on the platform, and I will check the canonical tags
-against whatever the host actually serves.
+certificate and the repository live in one place, and because the deploy simply publishes
+a folder of files: what the sitemap and canonical tags claim is what the server returns.
+If you would rather stay on Cloudflare, that is fine — I have no dependency on the
+platform, and I will check the canonical tags against whatever the host serves.
 
 Email — Cloudflare Email Routing for receiving, forwarding anything@learntocook.au into
 the Gmail account you already use. No mailbox to run, and the MX records sit in the same
@@ -30,7 +29,7 @@ and Search Console verified with the sitemap submitted — that last step happen
 domain is connected, and I will confirm it with you rather than assume it.
 
 You will get a short written list of what I found and what I changed, so you can
-re-check it yourself afterwards.
+re-check it yourself.
 
 I will not rewrite page content or redesign anything without asking you first. If
 something turns out to be substantially more work than the above implies, I will stop
