@@ -109,17 +109,25 @@ process, then one complete plus one partial with distinct markers — produced:
 
 - Both filed to the **inbox**. No spam at all.
 - The same payload that had been filed to spam at 12:15 was filed to the inbox at 12:15
-  and again at 12:17, so the timestamp alone settles nothing.
+  and again at 12:17, so the timestamp alone settles nothing. (Caveat: the dashboard shows
+  names and times, not field values, so "the same payload" rests on what was typed, not on
+  anything the readings themselves display.)
 - Two byte-identical submissions produced **one dashboard row**, i.e. the service
   deduplicates identical payloads. That is why the earlier "sent twice, saw it split"
   reasoning had no artifact behind it: there was only ever one row to see.
 
-The pattern that fits every reading is a filter that **changed its mind about this form
-during the window** — spam before ~12:17, inbox for six consecutive submissions after,
-including a deliberately partial one and a honeypot-filled one. So the original
-observation ("it was filed as spam") was true, the generalisation from it was false, and
-the retraction of that generalisation was itself over-claimed. Three wrong versions in a
-row, each time by asserting more than the measurement carried.
+What the readings show is a **change of outcome during the window**: spam from `12:06` to
+`12:17`, inbox from `12:13` onward, with the two lists overlapping around `12:13`–`12:17`.
+The partial (`12:13`) and honeypot (`12:13`) rows reached the inbox *before* the last spam
+row at `12:17`, so there is no clean switch to point at. **The data does not identify which
+factor changed.** A server-side filter, a per-IP rate limit that tripped and reset, a
+reputation shift caused by the accepted submissions, a manual action in the dashboard
+itself, or a time/volume threshold would each fit — and this is the same dashboard the
+readings came from, so a human touching it is not excluded either.
+
+So the original observation ("it was filed as spam") was true, the generalisation from it
+was false, and the retraction of that generalisation was itself over-claimed. Three wrong
+versions in a row, each time by asserting more than the measurement carried.
 
 **Lesson, which is the reason this entry exists:** the project's recurring failure is not
 a wrong measurement, it is a **conclusion stated more strongly than the measurement

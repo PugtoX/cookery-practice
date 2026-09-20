@@ -159,21 +159,27 @@ Two things are **suggested but not established**, and are labelled that way on p
   inbox while complete ones were still being filed to spam around it. But that partial
   came from a different submitter, so it is one observation, not a controlled comparison.
 
-The reading that fits all of this is that the service's filter **changed its mind about
-this form during the window**. **Other explanations are not excluded by this data** and it
-would be another overclaim to name one as the mechanism. A per-IP or per-device rate limit
-that tripped and then reset, a reputation change triggered by the accepted submissions
-themselves, or a time-based threshold would all fit the same table. What can be said
-without reaching is the consequence:
+All that can be said is that **the filing changed between `12:06` and `12:17` and then
+stopped changing. Nothing in these readings identifies which factor moved.** A server-side
+filter, a per-IP or per-device rate limit that tripped and then reset, a reputation change
+triggered by the accepted submissions themselves, a time-based threshold, or **a person
+touching this dashboard** — the same surface these readings come from — would each fit.
+Naming one would be the same overclaim in a fourth version, so none is named. What can be
+said without reaching is the consequence:
 
-> A submission filed as spam is a normal event for a form the service has not learned yet,
-> and it stopped happening. It is **not** a property of the JavaScript-off path, and it is
-> not something to fix in the markup. Nothing in this repository can predict it.
+> A submission filed as spam is an event this project cannot predict or control, and it
+> stopped happening on its own. It is **not** a property of the JavaScript-off path, and
+> it is not something to fix in the markup.
 
-One incidental finding, measured twice: **identical payloads are deduplicated.** Two
-byte-identical submissions sent back to back produced one dashboard row, not two — once
-with the `Identical Pair Probe` payload and once with `DEDUP-IDENTICAL`. That is worth
-knowing before reading any submission count in this file as a count of requests.
+One limit on all of the above, stated because it weakens the case for any mechanism: **the
+dashboard shows names and times, never field values.** The claim that the same payload
+reached both buckets rests on what was typed into the form, not on anything the readings
+themselves display.
+
+One incidental finding, from a **single** observation: two byte-identical submissions sent
+back to back produced **one dashboard row**, not two. Two were sent and one row appeared;
+whether the key is the payload, the request or the moment is not distinguishable from one
+reading, and the tool types fixed literals, so a time-window rule would look the same.
 
 The one thing still worth doing is the client's: send it once by hand from a real browser
 with JavaScript off. Not because it will fail, but because nothing here substitutes for a

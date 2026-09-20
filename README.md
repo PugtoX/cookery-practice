@@ -107,9 +107,6 @@ a local sink it starts itself — and adds records to the form's dashboard.
 `hugoyuan2004@gmail.com` and the notification was read back out of the mailbox. That is
 the claim that matters, and it does not come from any test in this repository.
 
-Two more checks live in the workflow this project came from and are run from there,
-because they are shared across projects rather than owned by this one:
-
 To regenerate the social preview image after editing `assets/og.svg`:
 
 ```bash
@@ -157,9 +154,8 @@ Submissions arrive at the account that owns that form. To point it somewhere els
    that looks like it worked but goes nowhere is worse than no form at all, because
    the visitor believes they have been in touch.
 
-The form id is not a secret: it ships in the HTML of every page that posts to it.
-
-Until the id is replaced, the page says so plainly rather than pretending to send.
+The form id is not a secret: it ships in the HTML of every page that posts to it. It is
+the live endpoint, not a placeholder.
 
 Spam and duplicate protection: a honeypot field, plus a 60-second per-browser
 cooldown. Neither is a security control; they stop bots and double-taps.
