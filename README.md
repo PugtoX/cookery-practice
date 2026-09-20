@@ -98,10 +98,11 @@ module never loads, so this path cannot be tested any other way. It checks the
 honeypot, and then submits to the real endpoint twice — once complete, once partial — to
 see where a JavaScript-off visitor actually ends up. **It is not a delivery test**, and it
 cannot tell you where the service filed anything: as measured, the same endpoint filed
-early submissions to spam and later identical ones to the inbox, so filing is a
-server-side judgement that changes over time. Read `docs/form-submission.md` for the
-timeline. This tool sends three submissions each run — two to the live endpoint and one to
-a local sink it starts itself — and adds records to the form's dashboard.
+early submissions to spam and later ones carrying the same field values to the inbox. Why
+that changed is not identifiable from here, and this README will not guess. Read
+`docs/form-submission.md` for the timeline and for the constraints on it. This tool sends
+three submissions each run — two to the live endpoint and one to a local sink it starts
+itself — and adds records to the form's dashboard.
 
 **A real delivery was verified separately.** A submission made from the live site reached
 `hugoyuan2004@gmail.com` and the notification was read back out of the mailbox. That is
