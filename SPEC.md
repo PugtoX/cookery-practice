@@ -190,6 +190,55 @@ Date:
 
 ---
 
+## 7. Stage 1 — keyword, and how it was chosen
+
+**Primary keyword: `cooking classes sydney`** (home page title + the single `<h1>`).
+**Secondary: `knife skills class`**, `bread baking class`, `pasta making class`,
+`market to table` — one per class page, each with its own `<title>` and `<h1>`.
+
+### Evidence (reproducible — raw output, not a paraphrase)
+
+Google's autocomplete endpoint, queried with a browser user agent:
+
+```
+https://suggestqueries.google.com/complete/search?client=firefox&q=cooking+classes+sydney
+```
+
+```json
+["cooking classes sydney",["cooking classes sydney fish market","cooking classes sydney",
+"cooking classes sydney cbd","cooking classes sydney for beginners","cooking classes sydney for adults",
+"cooking classes sydney reddit","cooking classes sydney ns","cooking classes sydney australia",
+"cooking classes sydney for couples","cooking classes sydney team building"],[],
+{"google:suggestsubtypes":[[512],[512],[30],[30],[30],[30],[30],[30],[30],[30]]}]
+```
+
+Same endpoint, `q=knife+skills`:
+
+```json
+["knife skills",["knife skills list with pictures","knife skills","knife skills class near me",
+"knife skills class","knife skills for beginners","knife skills class nyc","knife skills course",
+"knife skills class london","knife skills classes near me","knife skills for beginners book"]]
+```
+
+### What that actually establishes — and what it does not
+
+**Does establish:** the phrase completes to itself as the top suggestion, and the
+variants that come back are *city modifiers* (`cbd`, `fish market`), *audience
+modifiers* (`for beginners`, `for adults`, `for couples`) and *occasion modifiers*
+(`team building`). "Near me" and "for beginners" appear across the class-level queries.
+That is a demand signature for a **local, browseable, class-level** site rather than a
+single brochure page — which is why this site has four class pages and internal links
+between them.
+
+**Does not establish:** any search volume, difficulty, or ranking forecast.
+Autocomplete reflects which completions exist, not how many people use them, and no
+keyword tool is available here. **No number in this file is a volume estimate.** The
+only honest volume evidence available is Search Console, after the site is live and
+verified — that is recorded in the handover note as the next step, and until then this
+keyword is an *unverified assumption*, not a validated one.
+
+---
+
 ## Appendix — Practice-run decisions I made on the client's behalf
 
 These are guesses standing in for answers a real client would give. They are listed so

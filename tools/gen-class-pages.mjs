@@ -58,11 +58,11 @@ const classes = [
   },
   {
     slug: 'pasta-from-scratch',
-    title: 'Pasta Making Class in Sydney — Egg Dough by Hand | Cookery Class',
-    metaTitle: 'Pasta Making Class in Sydney — 3 Hours, Small Group',
+    title: 'Pasta Making Class Sydney — Egg Dough by Hand | Cookery Class',
+    metaTitle: 'Pasta Making Class Sydney — 3 Hours, Small Group',
     description:
       'A three-hour pasta making class in Sydney. Egg dough by hand, two shapes, and a sauce built in the same pan. No machine needed at home. Eight people, AUD 120.',
-    h1: 'Pasta from scratch class in Sydney',
+    h1: 'Pasta making class Sydney',
     lede: 'Egg dough made by hand — no machine to buy afterwards — rolled into two shapes and finished with a sauce built in the same pan.',
     eyebrow: 'Three hours',
     price: '120',
