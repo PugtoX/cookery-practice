@@ -125,20 +125,24 @@ try {
   const off = await browser.newPage()
   await off.setJavaScriptEnabled(false)
   await off.goto(localUrl, { waitUntil: 'domcontentloaded' })
+  // Fill and submit through native input, not page.evaluate(). Using an injected script
+  // to fill a form whose whole point is that scripts are off would make the harness
+  // itself the thing under test. evaluate() is used below only to *read* attributes.
+  const hasForm = (await off.$('#callback')) !== null
+  record('no-JS: form is present on the served page', hasForm, hasForm ? '' : 'no #callback')
+  await off.type('#name', 'No-JS Check')
+  await off.type('#contact', 'nojs@example.com')
+  await off.select('#interest', 'Pasta From Scratch')
+  await off.type('#notes', 'Native submit with JavaScript disabled.')
   const typed = await off.evaluate(() => {
     const f = document.getElementById('callback')
-    if (!f) return { error: 'no #callback form' }
-    f.querySelector('#name').value = 'No-JS Check'
-    f.querySelector('#contact').value = 'nojs@example.com'
-    f.querySelector('#interest').value = 'Pasta From Scratch'
-    f.querySelector('#notes').value = 'Native submit with JavaScript disabled.'
     return {
       method: f.getAttribute('method'),
-      action: f.getAttribute('action'),
       buttonType: f.querySelector('button[type="submit"]')?.getAttribute('type') ?? null,
+      name: f.querySelector('#name').value,
     }
   })
-  record('no-JS: form is present and typed into', !typed.error, typed.error ?? `method=${typed.method}`)
+  record('no-JS: native typing reached the field', typed.name === 'No-JS Check', `name=${JSON.stringify(typed.name)}`)
   record('no-JS: method attribute is POST', (typed.method ?? '').toUpperCase() === 'POST', `method=${typed.method}`)
   record('no-JS: submit button defaults to submit', typed.buttonType === 'submit', `type=${typed.buttonType}`)
 
@@ -146,7 +150,7 @@ try {
     .waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15000 })
     .then(() => true)
     .catch(() => false)
-  await off.evaluate(() => document.getElementById('callback').requestSubmit())
+  await off.click('button[type="submit"]')
   const navigated = await attempted
   await sleep(500)
 
@@ -179,24 +183,21 @@ try {
     if (u.startsWith('https://formspree.io/')) liveText.push(`${r.status()} ${u}`)
   })
   await live.goto(LIVE_ORIGIN, { waitUntil: 'domcontentloaded', timeout: 30000 })
-  const liveForm = await live.evaluate(() => {
-    const f = document.getElementById('callback')
-    if (!f) return { error: 'no #callback form on the live page' }
-    f.querySelector('#name').value = 'No-JS Live Check'
-    f.querySelector('#contact').value = 'nojs-live@example.com'
-    f.querySelector('#interest').value = 'Pasta From Scratch'
-    f.querySelector('#notes').value = 'Deployed-site native submit, JavaScript disabled. Safe to delete.'
-    return { method: f.getAttribute('method'), action: f.getAttribute('action') }
-  })
-  if (liveForm.error) {
-    record('live: form present on deployed page', false, liveForm.error)
+  const liveHasForm = (await live.$('#callback')) !== null
+  if (!liveHasForm) {
+    record('live: form present on deployed page', false, 'no #callback on the live page')
   } else {
-    record('live: deployed form method is POST', (liveForm.method ?? '').toUpperCase() === 'POST', `method=${liveForm.method}`)
+    await live.type('#name', 'No-JS Live Check')
+    await live.type('#contact', 'nojs-live@example.com')
+    await live.select('#interest', 'Pasta From Scratch')
+    await live.type('#notes', 'Deployed-site native submit, JavaScript disabled. Safe to delete.')
+    const liveMethod = await live.$eval('#callback', (f) => f.getAttribute('method'))
+    record('live: deployed form method is POST', (liveMethod ?? '').toUpperCase() === 'POST', `method=${liveMethod}`)
     const liveNav = live
       .waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 20000 })
       .then(() => true)
       .catch(() => false)
-    await live.evaluate(() => document.getElementById('callback').requestSubmit())
+    await live.click('button[type="submit"]')
     await liveNav
     await sleep(1500)
     const landed = live.url()

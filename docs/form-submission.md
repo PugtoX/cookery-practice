@@ -82,7 +82,10 @@ JavaScript switched off.
 
 What it proves: the native POST leaves the browser with `Content-Type:
 application/x-www-form-urlencoded` and all five fields — `name`, `contact`, `interest`,
-`notes`, `website` — with the honeypot empty. 14/14 checks pass.
+`notes`, `website` — with the honeypot empty. The typing and the submit themselves go
+through native browser input, not an injected script: filling a form with `page.evaluate`
+while claiming JavaScript is off would put the harness, not the fallback, under test.
+15/15 checks pass.
 
 What it also found, and this was **not** what the comment claimed:
 
