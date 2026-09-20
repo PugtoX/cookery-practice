@@ -21,6 +21,10 @@
   --fg: #12180f;
   --muted: #57614b;
   --grid: rgba(18, 24, 15, 0.05);
+  /* Grid texture tile. 28px is 1.75rem at the 16px root, so the tile lands on the
+     4px rhythm the rest of the spacing uses. --grid held the colour from the start
+     and was referenced by nothing; this is the rule that finally consumes it. */
+  --grid-tile: 28px;
 
   --measure: 34rem;
   --step-0: 1rem;
@@ -221,6 +225,33 @@ section:last-of-type {
 
 .page-head {
   padding-top: var(--step-3);
+}
+
+/* ---------- Grid texture ----------
+   "Grid Paper" background direction: a 1px olive grid on the page-head and the
+   steps list, nothing else. It adds no bytes and no requests beyond these rules,
+   and no motion. Do not move it onto `body` — the sticky header has an opaque
+   `--page` background and would cut a seam through it. Full rationale and the
+   measured numbers: docs/design/background-system.md. */
+.page-head,
+ol.steps {
+  position: relative;
+  isolation: isolate;
+}
+
+.page-head::before,
+ol.steps::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(to right, var(--grid) 0 1px, transparent 1px var(--grid-tile)),
+    repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px var(--grid-tile));
+  background-size: var(--grid-tile) var(--grid-tile);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
 }
 
 /* ---------- Buttons ---------- */

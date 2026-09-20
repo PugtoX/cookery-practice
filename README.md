@@ -206,9 +206,19 @@ tools/emit-page.mjs                      shared shell for the generated pages
 tools/gen-*.mjs                          one-off generators (see below)
 tools/form-e2e.mjs                       drives a browser through the form's real path
 tools/nojs-post-check.mjs                the same form with JavaScript disabled
+tools/css-cost.mjs                       bytes added to the stylesheet, raw / gzip / brotli
+tools/preview-check.mjs                  renders the background preview; 375px overflow check
+docs/design/background-system.md         the background/UI design specification
+docs/backgrounds-preview.html            the three background directions side by side
 tests/validate.test.js                   13 tests for the form rules
 .github/workflows/deploy-pages.yml       push to main -> build -> deploy
 ```
+
+The two `docs/` entries above are design material, not part of the site: `tools/build.mjs`
+skips `docs/`, and the deploy workflow uploads only `dist/`, so neither is ever published.
+Open the preview straight from disk — `docs/backgrounds-preview.html` — because
+`npm run dev` serves `dist/`, which does not contain it. It loads `../assets/style.css`, so
+it always shows the real stylesheet.
 
 `tools/gen-class-pages.mjs` and `tools/gen-content-pages.mjs` produced the class and
 content pages from data tables, so that five near-identical pages could not drift

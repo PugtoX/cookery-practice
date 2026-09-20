@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>背景方向对比 — A / B / C</title>
+
+    <!--
+      Throwaway design preview. NOT part of the site: it is excluded from the build
+      and carries noindex. It exists so the three background directions can be judged
+      on the real pages rather than on a colour chip.
+
+      It loads ../assets/style.css verbatim, so every number on screen is the real one.
+      Only two things are added here:
+        [1] the candidate rules, namespaced under [data-bg="a|b|c"]
+        [2] the switcher chrome, namespaced .pv-*
+
+      Delete this whole folder when the direction is chosen.
+    -->
+    <link rel="stylesheet" href="../assets/style.css" />
+    <style>
+      /* ============================================================
+         Switcher chrome — .pv-* only, never shipped
+         ============================================================ */
+      .pv-bar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        padding: 8px 16px;
+        background: #12180f;
+        color: #f7f8f3;
+        font-size: 0.875rem;
+      }
+      .pv-bar b { font-weight: 600; margin-right: 4px; }
+      .pv-bar button {
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid #57614b;
+        background: #1c2416;
+        color: #f7f8f3;
+        font: inherit;
+        cursor: pointer;
+      }
+      .pv-bar button[aria-pressed="true"] {
+        background: #3f6212;
+        border-color: #6b9a2a;
+        font-weight: 600;
+      }
+      .pv-bar .pv-note { opacity: 0.75; margin-left: auto; }
+      .pv-label {
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #57614b;
+        margin: 0 0 6px;
+      }
+      .pv-demo {
+        margin: 0 0 var(--step-3);
+        padding: var(--step-1);
+        border: 1px dashed #cbd3bb;
+        border-radius: var(--radius);
+      }
+      .pv-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+
+      /* ============================================================
+         A — Grid Paper
+         Reuses --grid, which already exists in style.css and is currently
+         referenced by nothing. Applies to content blocks only: body and header
+         keep --page, so the sticky header seam cannot appear.
+         ============================================================ */
+      [data-bg="a"] .page-head,
+      [data-bg="a"] .steps {
+        position: relative;
+        isolation: isolate;
+      }
+      [data-bg="a"] .page-head::before,
+      [data-bg="a"] .steps::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background-image:
+          repeating-linear-gradient(to right, var(--grid) 0 1px, transparent 1px 28px),
+          repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px 28px);
+        background-size: 28px 28px;
+        -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+        mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+        pointer-events: none;
+      }
+      [data-bg="a"] .pv-demo {
+        background-image:
+          repeating-linear-gradient(to right, var(--grid) 0 1px, transparent 1px 28px),
+          repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px 28px);
+        background-size: 28px 28px;
+      }
+
+      /* ============================================================
+         B — Olive Wash
+         Two radial gradients built from --accent. background-attachment stays
+         `scroll`: `fixed` is a known scroll-jank source on iOS and buys nothing here.
+         The header is rebased on the same layer, which is what kills the seam.
+         ============================================================ */
+      [data-bg="b"] {
+        --wash-1: rgba(63, 98, 18, 0.06);
+        --wash-2: rgba(63, 98, 18, 0.03);
+        --wash-layer:
+          radial-gradient(120% 80% at 50% -10%, var(--wash-1) 0%, transparent 60%),
+          radial-gradient(90% 60% at 100% 0%, var(--wash-2) 0%, transparent 55%);
+        background-color: var(--page);
+        background-image: var(--wash-layer);
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+      }
+      [data-bg="b"] .site-header {
+        background-color: var(--page);
+        background-image: var(--wash-layer);
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+      }
+      [data-bg="b"] .pv-demo {
+        background-color: var(--page);
+        background-image: var(--wash-layer);
+        background-repeat: no-repeat;
+      }
+
+      /* ============================================================
+         C — Charcoal Kitchen (dark)
+         Shown with the shortlisted dark palette rather than by editing --accent:
+         this is a re-skin proposal, so it must be judged as one.
+         Measured in web-gzliu/palettes/index.html: fg/panel 15.80, muted/panel 6.86.
+         ============================================================ */
+      [data-bg="c"] {
+        --accent: #b08d4f;
+        --accent-soft: rgba(176, 141, 79, 0.14);
+        --page: #0c0d0e;
+        --panel: #16181a;
+        --panel-hover: #1d2023;
+        --line: #2a2e32;
+        --line-strong: #3d4348;
+        --fg: #f4f1ec;
+        --muted: #a5a09a;
+        --grid: rgba(244, 241, 236, 0.05);
+        background-color: var(--page);
+        background-image:
+          radial-gradient(110% 70% at 15% -10%, rgba(176, 141, 79, 0.10) 0%, transparent 55%),
+          radial-gradient(90% 60% at 90% 0%, rgba(176, 141, 79, 0.06) 0%, transparent 50%);
+        background-repeat: no-repeat;
+      }
+      [data-bg="c"] .pv-demo { background: var(--panel); }
+      [data-bg="c"] .pv-bar button { background: #1d2023; border-color: #3d4348; color: #f4f1ec; }
+      [data-bg="c"] .pv-bar button[aria-pressed="true"] { background: #b08d4f; border-color: #c9a76a; color: #12180f; }
+      [data-bg="c"] .pv-label { color: var(--muted); }
+
+      /* Motion is not added by any direction. This block exists so that if a later
+         revision does add one, the preference is already honoured rather than
+         retrofitted after someone reports a problem. */
+      @media (prefers-reduced-motion: reduce) {
+        * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+      }
+    </style>
+  </head>
+  <body data-bg="a">
+    <div class="pv-bar">
+      <b>背景方向：</b>
+      <button type="button" data-pick="a" aria-pressed="true">A · 网格纸</button>
+      <button type="button" data-pick="b" aria-pressed="false">B · 橄榄光晕</button>
+      <button type="button" data-pick="c" aria-pressed="false">C · 暗色厨房</button>
+      <span class="pv-note">真实样式表 · 按 <kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd> 切换</span>
+    </div>
+
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="#">Cookery Class</a>
+        <nav class="site-nav" aria-label="Main">
+          <ul>
+            <li><a href="#" aria-current="page">Home</a></li>
+            <li><a href="#">Classes</a></li>
+            <li><a href="#">Recipes</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="page-head">
+        <div class="wrap">
+          <p class="eyebrow">Sydney · hands-on kitchen</p>
+          <h1>Cooking classes Sydney — for people who want to cook, not watch</h1>
+          <p class="lede">
+            Eight people to a class, one bench each, and you eat what you make. Knife skills, bread,
+            pasta and a Saturday market table — all taught in a working kitchen in the city.
+          </p>
+          <div class="actions">
+            <a class="btn" href="#">Ask us to call you back</a>
+            <a class="btn btn-ghost" href="#">See all classes</a>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="classes-heading">
+        <div class="wrap">
+          <h2 id="classes-heading">Classes you can book</h2>
+          <p class="muted">Every class is hands-on, and every class ends with a sit-down meal.</p>
+          <ul class="cards">
+            <li class="card">
+              <a class="card-link" href="#">
+                <span class="tag">3 hours</span>
+                <h3>Knife Skills Basics</h3>
+                <p class="muted">Grip, sharpening and four cuts that cover most of what a recipe asks for.</p>
+              </a>
+            </li>
+            <li class="card">
+              <a class="card-link" href="#">
+                <span class="tag">5 hours</span>
+                <h3>Bread Baking Fundamentals</h3>
+                <p class="muted">A starter you keep, a loaf you shape, and the reason your last one was dense.</p>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- A concentrated swatch, so the direction can be judged without scrolling -->
+      <section>
+        <div class="wrap">
+          <p class="pv-label">方向在标题块上的落点</p>
+          <div class="pv-demo">
+            <p class="eyebrow">Sydney · hands-on kitchen</p>
+            <h2 style="margin-top: 0">Bread Baking Fundamentals</h2>
+            <p class="lede" style="margin-bottom: 0">
+              A starter you keep, a loaf you shape, and the reason your last one was dense.
+            </p>
+            <div class="pv-controls">
+              <a class="btn" href="#">Primary</a>
+              <a class="btn btn-ghost" href="#">Secondary</a>
+              <span class="tag">5 hours</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="how-heading">
+        <div class="wrap">
+          <h2 id="how-heading">How a class runs</h2>
+          <ol class="steps">
+            <li>You book a date and tell us about allergies or anything you do not eat.</li>
+            <li>You arrive fifteen minutes early — apron, knife and bench are already set up.</li>
+            <li>We cook together for the length of the class, tasting as we go.</li>
+            <li>You eat what you made, and take the recipe card home.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section aria-labelledby="facts-heading">
+        <div class="wrap">
+          <h2 id="facts-heading">Where we are</h2>
+          <dl class="facts">
+            <div>
+              <dt>Address</dt>
+              <dd>12 Example Lane, Sydney NSW 2000</dd>
+            </div>
+            <div>
+              <dt>Getting here</dt>
+              <dd>Five minutes from the station; street parking after 6pm</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p class="brand">Cookery Class</p>
+        <address>12 Example Lane, Sydney NSW 2000</address>
+        <ul>
+          <li><a href="mailto:hello@example.com">hello@example.com</a></li>
+          <li><a href="tel:+61200000000">(02) 0000 0000</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <script>
+      // Switcher only. Nothing here ships with the site.
+      const body = document.body
+      const buttons = [...document.querySelectorAll('.pv-bar button[data-pick]')]
+      function pick(id) {
+        body.dataset.bg = id
+        for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.pick === id))
+      }
+      for (const b of buttons) b.addEventListener('click', () => pick(b.dataset.pick))
+      addEventListener('keydown', (e) => {
+        if (e.target.closest('input, textarea')) return
+        const map = { 1: 'a', 2: 'b', 3: 'c' }
+        if (map[e.key]) pick(map[e.key])
+      })
+    </script>
+  </body>
+</html>
