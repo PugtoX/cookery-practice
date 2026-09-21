@@ -16,12 +16,15 @@ const DIR = 'E:/AI/AI_Agent/workplace/cookery-practice/docs/redesign/img'
 
 // Width per slot, matching how wide the image is actually displayed.
 // hero is full-bleed, so it gets a 2x variant as well.
+// The four card photographs gained a 400px variant because the cards are one column at
+// 375px: there the browser needs only about 345 CSS px, and shipping the 800px file cost
+// roughly 87 KiB. Measured by Lighthouse's image-delivery insight, not estimated.
 const PLAN = [
   { slot: 'hero', widths: [1600, 2560] },
-  { slot: 'knife-skills', widths: [800] },
-  { slot: 'bread-baking', widths: [800] },
-  { slot: 'pasta-from-scratch', widths: [800] },
-  { slot: 'market-table', widths: [800] },
+  { slot: 'knife-skills', widths: [800, 400] },
+  { slot: 'bread-baking', widths: [800, 400] },
+  { slot: 'pasta-from-scratch', widths: [800, 400] },
+  { slot: 'market-table', widths: [800, 400] },
   { slot: 'about', widths: [1200] },
 ]
 
@@ -36,7 +39,12 @@ for (const { slot, widths } of PLAN) {
     continue
   }
   for (const w of widths) {
-    const base = w === 1600 || widths.length === 1 ? slot : `${slot}-${w}`
+    // Naming: the primary delivery file of a slot is unsuffixed — every `src` and the
+    // hero's first candidate point at it — and extra candidates get a `-<w>` suffix.
+    // So hero is [1600] → `hero.*` plus [2560] → `hero-2560.*`. `about` has a single
+    // width and stays `about.*` (nothing references it yet, but the name is settled).
+    const isPrimary = w === widths[0]
+    const base = isPrimary ? slot : `${slot}-${w}`
     const outWebp = join(DIR, `${base}.webp`)
     const outAvif = join(DIR, `${base}.avif`)
     const scale = `scale=${w}:-2`
