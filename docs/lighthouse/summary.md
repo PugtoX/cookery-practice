@@ -1,7 +1,7 @@
 # Lighthouse — mobile, on the live URL
 
 Measured on **https://pugtox.github.io/cookery-practice/** after the Pages deployment of
-`bbd0b7b`. Regenerate the raw JSON with:
+`40a8108`. Regenerate the raw JSON with:
 
 ```bash
 npx lighthouse https://pugtox.github.io/cookery-practice/ \
@@ -12,14 +12,18 @@ npx lighthouse https://pugtox.github.io/cookery-practice/ \
 ```
 
 The `.json` and `.html` outputs are gitignored (500–900 kB each). This file is the record.
+On Windows the run sometimes exits 1 inside `chrome-launcher`'s `destroyTmp` while it
+deletes its own temp profile. The report is written before that step, so read the JSON
+rather than trusting the exit code.
 
 | | |
 |---|---|
 | Lighthouse | 13.5.0 |
 | URL | `https://pugtox.github.io/cookery-practice/` (`finalDisplayedUrl`, checked) |
-| form factor | mobile (emulated Moto G Power) |
+| form factor | mobile (emulated Moto G Power, DPR 2.625) |
 | throttling | simulate, Slow 4G |
 | run warnings | none |
+| console errors | 0 |
 
 ## Scores
 
@@ -36,93 +40,95 @@ The `.json` and `.html` outputs are gitignored (500–900 kB each). This file is
 |---|---|
 | First Contentful Paint | 1.2 s |
 | Largest Contentful Paint | 1.4 s |
-| Total Blocking Time | 0 ms |
+| Total Blocking Time | 10 ms |
 | Cumulative Layout Shift | 0 |
-| Speed Index | 3.9 s |
-| Total transfer | 329 KiB in 9 requests |
+| Total transfer | 322 KiB in 9 requests (313 KiB of it images) |
 
-**Run-to-run variance is large and is not a regression.** Two runs of the *same* build
-bracketed the `.tag` fix, which changed one text colour and nothing else:
+**CLS 0 is the one that matters and it is not luck.** The four class pages declare
+`width`/`height` on their figures and the home page cards declare them too, so the boxes
+are reserved before the bytes arrive. It was 0 before the photographs existed, so this is
+a measured zero rather than an absent one.
 
-| | run 1 | run 2 |
+**Performance 98 is one number from a wide band.** Three runs of essentially the same
+build produced 100, 98 and 98, and Speed Index moved 1.8 s → 3.9 s with no code change
+behind it. Judge LCP, TBT and CLS — stable across every run — not the rounded score.
+
+## What was fixed because of this audit
+
+**`color-contrast` on `.tag` — Accessibility 96 → 100.** The tag painted `--accent` on
+`--accent-soft`, a 10%-alpha accent wash over `--panel`. Lighthouse measured the
+composited pair at **3.71:1** where 11px normal-weight text needs 4.5:1. The composited
+background is the denominator that counts; against flat `--panel` the same colours read
+4.19 and against flat `--page` 4.64, and both wrong numbers are close enough to look
+fine. Fixed by painting the tag with `--accent-strong`, already a token in this palette:
+**4.96:1**. The defect predated the class-page photographs — `.tag` is on `index.html`.
+
+That gap is why `tools/contrast-audit.mjs` exists. It reads computed styles from a real
+browser, composites translucent backgrounds, and covers all 11 pages (202 distinct
+text/colour pairs). It was verified to fail: with `.tag` back on `--accent` it reports
+4.09:1 on `index.html` and exits 1.
+
+**Four 404s and a fake optimisation.** Adding a 400px candidate to the cards first
+pointed `srcset` at `{name}-800.avif`, which does not exist — the 800px delivery file is
+unsuffixed. Lighthouse caught it through `errors-in-console` (Best Practices 100 → 96).
+Worse, while that file was 404ing the browser fell back to the 400px one, and a local run
+reported image transfer of **85 KB against the live 320 KB**. That looked like a 235 KB
+win and was entirely an artefact of the broken reference. Once fixed, the same
+measurement returned 320 KB. Recorded in full in `change-requests.md` CR-10.
+
+**Card alt text.** Three of the four home-page card alts were wrong — purple aubergines
+described as "purple onions", tomatoes missing from the pasta image and baking paper
+called a board, and a too-generic knife description. Rewritten after viewing each
+photograph, to the standard applied to the class pages.
+
+**The image directories had drifted.** Running the optimiser to build the 400px files
+also re-encoded eight existing files, leaving `assets/img/` and `docs/redesign/img/`
+disagreeing for the first time. Closed by syncing, and it was worth doing:
+`hero-2560.avif` was 173 KB and is now 127 KB, `hero-2560.webp` 425 KB → 275 KB. Verified
+in a browser at 375 / 1280 / 2560px that the re-encoded hero is valid and still selected
+at the right breakpoint.
+
+## What the image work does not buy
+
+**The 400px candidate does not reduce bytes in this particular audit.** The cards measure
+365 CSS px at a 1280px container, so at DPR 2 the browser needs about 690 physical px and
+still picks the 800px file. Measured per-DPR with a fresh page each time:
+
+| viewport | DPR | picked |
 |---|---|---|
-| Performance | 100 | 98 |
-| Speed Index | 1.8 s | 3.9 s |
-| LCP | 1.4 s | 1.4 s |
-| TBT / CLS | 0 ms / 0 | 0 ms / 0 |
+| 375px / 1280px | 1 | **400px** |
+| 375px | 2, 2.625 | 800px |
+| 1280px | 2 | 800px |
 
-Speed Index more than doubled with no code change behind it. Judge LCP, TBT and CLS —
-stable across both — and not the rounded score or SI. The pre-redesign record made the
-same observation (97 and 99 on the same day).
-
-**CLS 0** is the one that matters most here and it is not luck: the four class pages
-declare `width`/`height` on their figures, so the box is reserved before the bytes
-arrive. It was 0 before the photographs existed too, so it is a real measurement rather
-than an absent one.
-
-## Accessibility — one real defect, found and fixed (and it is pre-existing)
-
-The only failing audit is `color-contrast`:
-
-```
-span.tag  "3 HOURS"  foreground #a8622f  background #ede3d6
-insufficient contrast of 3.71 (font size 11px, weight normal). Expected 4.5:1
-```
-
-`.tag` painted `--accent` text on `--accent-soft`, a 10%-alpha accent wash over
-`--panel`. The composited background is what counts, and the arithmetic that matters is
-`--accent` against **that**: **3.72:1**, not the 4.19 you get against flat `--panel`
-nor the 4.64 against flat `--page`. Both of those wrong denominators are how this
-survived review.
-
-**This defect predates the class-page photographs** — `.tag` is on `index.html`, which
-the photograph change never touched. Lighthouse had simply never been run on this build.
-
-Fixed by painting `.tag` with `--accent-strong` (already a token in this palette):
-**4.96:1**. Re-verified by redeploying and re-running this audit — Accessibility is
-**100** and `color-contrast` passes in the run recorded at the top of this file.
-
-## Why the SEO score is not the acceptance for SEO work
-
-In Lighthouse 13.5 the `canonical`, `structured-data` and `robots-txt` audits all carry
-a weight of 0 — they show as `null` / `notApplicable`, so a site missing all three still
-scores 100. The acceptance for that work is
-`node ../web-gzliu/seo-check.mjs .` (**232 checks, all passing**), not this score. Same
-trap recorded in `web-gzliu/workflow.md` stage 4.
-
-## Two things the scores do not show
-
-**Cache lifetime is a platform property, not ours.** `cache-insight` scores 0 and flags
-all 8 subresources at a 600 s TTL. That is the GitHub Pages default; nothing in this
-repository can change it. It is recorded so it is not mistaken for a build defect.
-
-**On mobile, all five photographs load, and that is a design assumption that does not
-hold.** Total image transfer is 320 KiB of the 329 KiB. The home page hero is lazy-free
-by design, but the four card images carry `loading="lazy"` on the assumption that cards
-sit below the fold — true at 1280px, false at the 412px emulated viewport, where the
-cards stack to one column and every one of them is near the first screen. The
-photographs cost 10 KiB → 329 KiB against the zero-image baseline below.
-
-`image-delivery-insight` also reports ~87 KiB of avoidable bytes: `market-table.avif`
-(800px wide, displayed 660px) wastes 56.8 kB, `bread-baking.avif` 19.8 kB,
-`pasta-from-scratch.avif` 12.8 kB. The home page hero already uses `srcset`; the card
-images do not. Not fixed here — record only.
+So the win is real on 1× displays (`market-table` 111 KB → 29 KB) and nothing on
+high-density phones, which is what Lighthouse emulates. The audit's separate
+`image-delivery-insight` figure (~87 KiB) is about an 800px file being served into a
+660px display size; at DPR 2.625 that 800px is the physical pixels required, not waste.
+Recorded, not chased.
 
 ## Baseline, for contrast (before the redesign, zero images)
 
-| | then | now |
-|---|---|---|
-| Performance | 98 | 100 → 98 (see variance above) |
-| Accessibility | 100 | 96 → **100** after the `.tag` fix |
-| Best Practices | 100 | 100 |
-| SEO | 100 | 100 |
-| LCP | 1.3 s | 1.4 s |
-| CLS | 0 | 0 |
-| Total transfer | **10 KiB** | **329 KiB** |
+| | then | first run on this build | now |
+|---|---|---|---|
+| Performance | 98 | 98 | 98 |
+| Accessibility | 100 | 96 | **100** |
+| Best Practices | 100 | 100 | 100 |
+| SEO | 100 | 100 | 100 |
+| LCP | 1.3 s | 1.4 s | 1.4 s |
+| CLS | 0 | 0 | 0 |
+| Total transfer | **10 KiB** | 329 KiB | 322 KiB |
 
-Performance rose while the site gained 320 KiB of images. Read that as evidence the
-score is not a contract, not as evidence the images were free: per visit the site now
-transfers roughly 33× what it did. The old number described a text-only page.
+The site now transfers roughly 32× what it did before it had any photographs. The old
+number described a text-only page, and a better Performance score does not mean the
+images were free.
+
+## SEO 100 is not the acceptance for the SEO work
+
+In Lighthouse 13.5 the `canonical`, `structured-data` and `robots-txt` audits all carry a
+weight of 0 — they show as `null` / `notApplicable`, so a site missing all three still
+scores 100. The acceptance for that work is `node ../web-gzliu/seo-check.mjs .`
+(**232 checks, all passing**), not this score. Same trap recorded in
+`web-gzliu/workflow.md` stage 4.
 
 ## Not yet measured
 
