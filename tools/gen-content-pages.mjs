@@ -278,9 +278,20 @@ ${pm('We do not use analytics or advertising cookies on this site, and we do not
 ${p('We do not sell your details, and we do not add you to a mailing list unless you ask us to.')}`,
       },
       {
+        // The callback form posts to Formspree, which transmits and stores the message
+        // on our behalf — so the details do pass through a third party before we ever
+        // see them, and it is that service which decides whether a message looks like
+        // spam. Omitting this made the page contradict how the site actually works.
+        id: 'processors',
+        heading: 'Who else handles it',
+        html: `${p('The callback form on this site is delivered by <a href="https://formspree.io/" rel="noopener">Formspree</a>, a form-handling service. When you submit the form, your details are sent to Formspree, which forwards them to our mailbox and stores a copy. Formspree also screens submissions for spam. Its own privacy policy governs what it does with the data while it holds it.')}
+${pm('The statement above still stands: we run no analytics and no advertising cookies ourselves, and we do not track you across other sites.')}`,
+      },
+      {
         id: 'keep',
         heading: 'How long we keep it',
-        html: `${p('Enquiries that do not turn into a booking are deleted within twelve months. Booking records are kept for seven years because tax law requires it.')}`,
+        html: `${p('Enquiries that do not turn into a booking are deleted within twelve months. Booking records are kept for seven years because tax law requires it.')}
+${pm('Messages held by Formspree are subject to that service\\u2019s own retention, not ours; removing them there is part of the deletion described below.')}`,
       },
       {
         id: 'delete',

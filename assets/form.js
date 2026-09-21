@@ -19,6 +19,21 @@ const status = document.getElementById('form-status')
 const ENDPOINT = form?.getAttribute('action') ?? ''
 const NOT_CONFIGURED = !/^https?:\/\/\S+$/i.test(ENDPOINT)
 
+// Opt out of the browser's own validation *here*, not in the markup.
+//
+// The form used to carry novalidate in index.html, which disabled native validation for
+// everyone — including visitors whose scripts never run, and the script is what provides
+// every check on this form. Measured on the shipped page with JavaScript off: with the
+// class left unselected, checkValidity() returned false and the click still submitted.
+// Formspree only rejects a wholly empty form, so a request with a blank class column
+// arrived as a valid record.
+//
+// Setting it from the script gives each visitor the best behaviour available to them:
+// with scripts, this file owns the messages (better copy than the native bubbles, and
+// the error text is announced via aria-describedby); without them, the browser enforces
+// the `required` attributes already present in the markup.
+if (form) form.setAttribute('novalidate', '')
+
 function showFieldErrors(errors) {
   for (const field of form.querySelectorAll('input, select, textarea')) {
     if (field.closest('.hp')) continue

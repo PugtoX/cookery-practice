@@ -310,11 +310,16 @@
                Measured both ways in tools/nojs-post-check.mjs.
                Form id is public by design: it ships in every page that posts to it,
                so it is not a secret. -->
+          <!-- No novalidate here on purpose. assets/form.js adds it when the script
+               runs, so a visitor with scripts gets this file's own messages, and a
+               visitor without scripts still gets the browser's native check on the
+               required fields below. Carrying it in the markup disabled validation
+               for both, which was measurably wrong: with no JavaScript, an unselected
+               class still submitted. -->
           <form
             id="callback"
             method="POST"
             action="https://formspree.io/f/xdekaddz"
-            novalidate
           >
             <div class="form-field">
               <label for="name">Your name</label>

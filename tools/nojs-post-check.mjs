@@ -153,25 +153,38 @@ async function liveSubmit(label, fields) {
   if (fields.notes) await page.type('#notes', 'Deployed-site native submit, JavaScript disabled. Safe to delete.')
   const method = await page.$eval('#callback', (f) => f.getAttribute('method'))
   record(`${label}: deployed form method is POST`, (method ?? '').toUpperCase() === 'POST', `method=${method}`)
-  // index.html carries novalidate, so the browser's own required-field check will NOT
-  // stop a partial submission. Measured here rather than assumed.
-  const nativeWouldBlock = await page.$eval('#callback', (f) => !f.checkValidity())
+
+  // With scripts off, the browser's own required-field check is now the only validation
+  // there is. index.html deliberately no longer carries novalidate; form.js adds it at
+  // runtime, so this path keeps native enforcement. Measured, not assumed.
+  const valid = await page.$eval('#callback', (f) => f.checkValidity())
+
   const nav = page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 20000 }).then(() => true).catch(() => false)
   await page.click('button[type="submit"]')
   await nav
   await sleep(1500)
   const landed = page.url()
   const body = await page.evaluate(() => (document.body?.innerText ?? '').slice(0, 400)).catch(() => '')
-  console.log(`      ${label}: ${traffic.join(' | ') || '(no formspree request seen)'}`)
+  console.log(`      ${label}: valid=${valid}  ${traffic.join(' | ') || '(no formspree request seen)'}`)
   console.log(`      ${label}: landed on ${landed}`)
-  record(`${label}: submission left the browser for formspree`, traffic.length > 0, traffic.join(' | ') || 'no request observed')
-  record(
-    `${label}: endpoint accepted it`,
-    /formspree\.io\/thanks/.test(landed) || /submitted successfully/i.test(body),
-    /formspree\.io\/thanks/.test(landed) ? landed : body.replace(/\s+/g, ' ').slice(0, 80),
-  )
+
+  if (valid) {
+    // A complete form must go through.
+    record(`${label}: request left the browser for formspree`, traffic.length > 0, traffic.join(' | ') || 'no request observed')
+    record(
+      `${label}: endpoint accepted a valid submission`,
+      /formspree\.io\/thanks/.test(landed) || /submitted successfully/i.test(body),
+      /formspree\.io\/thanks/.test(landed) ? landed : body.replace(/\s+/g, ' ').slice(0, 80),
+    )
+  } else {
+    // An incomplete form must NOT go anywhere. This is the assertion that would have
+    // failed before the novalidate change, when a blank class column reached the endpoint
+    // and was recorded as a valid submission.
+    record(`${label}: incomplete form made no network request`, traffic.length === 0, traffic.join(' | ') || 'no request — correct')
+    record(`${label}: incomplete form stayed on the page`, !/formspree\.io/.test(landed), landed)
+  }
   await page.close()
-  return { landed, body, traffic, nativeWouldBlock }
+  return { landed, body, traffic, nativeWouldBlock: !valid }
 }
 
 try {
@@ -246,11 +259,12 @@ try {
   const liveFull = await liveSubmit('live-full', { name: true, contact: true, interest: true, notes: true })
   const livePartial = await liveSubmit('live-partial', { name: true, contact: true, interest: false, notes: false })
   if (livePartial) {
-    // Not a site defect by itself — novalidate is deliberate so form.js can own the error
-    // messages. It IS a real gap for a JavaScript-off visitor, and it is recorded so the
-    // person deciding whether to keep novalidate can see the cost. See change-requests.md.
+    // Not a site defect: the browser blocked it, which is the point. index.html no longer
+    // carries novalidate; form.js adds it at runtime, so this path keeps native required
+    // enforcement. Before that change the partial submission reached the endpoint and was
+    // recorded with a blank class column. See change-requests.md CR-7.
     console.log(
-      `      live-partial: browser's own validity check would have blocked that submit: ${livePartial.nativeWouldBlock}`,
+      `      live-partial: native validation blocked the incomplete form: ${livePartial.nativeWouldBlock}`,
     )
   }
 } finally {

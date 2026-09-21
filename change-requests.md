@@ -141,30 +141,33 @@ received a real message.
 
 ---
 
-## CR-7 · The no-JS path has no validation at all (`novalidate`) — OPEN, needs the client
+## CR-7 · The no-JS path had no validation at all (`novalidate`) — FIXED
 
 **Found by:** the independent review of CR-6.
 
-**What is wrong:** `index.html` carries `novalidate` deliberately, so `form.js` can render
-its own error messages and wire them to fields with `aria-describedby`. But `novalidate`
-is a static attribute, and `form.js` never runs for a visitor without JavaScript. So on
-that path nothing validates:
+**What was wrong:** `index.html` carried `novalidate` deliberately, so `form.js` could
+render its own error messages and wire them to fields with `aria-describedby`. But
+`novalidate` is a static attribute, and `form.js` never runs for a visitor without
+JavaScript. So on that path nothing validated:
 
 - Measured: with only the name and contact filled and **no class selected**,
-  `form.checkValidity()` returns `false` and the click still submits. The endpoint
+  `form.checkValidity()` returns `false` and the click still submitted. The endpoint
   accepted it and the dashboard shows a submission with an empty class column.
 - A fully empty form is rejected by Formspree itself (`400 Can't send an empty form`), so
-  that case is covered by the service rather than by us.
-- The partial case is not covered by anyone.
+  that case was covered by the service rather than by us.
+- The partial case was not covered by anyone.
 
-**Smallest fix:** let the script opt *out* of native validation instead of the markup
-opting out for everyone — drop `novalidate` from the HTML and add it in `form.js` at
-startup. One line each way, no behaviour change for JavaScript users, and a no-JS visitor
-gets the browser's own `required` check.
+**Fix applied:** the script opts *out* of native validation instead of the markup opting
+out for everyone. `novalidate` is gone from `index.html`; `form.js` sets it at startup.
+No behaviour change for JavaScript users — this file still owns the messages — and a
+no-JS visitor now gets the browser's own `required` check. `tools/nojs-post-check.mjs` was
+updated to assert the new contract in both directions: a complete no-JS submission must
+still reach the endpoint, and an incomplete one must make **no network request at all**
+and stay on the page.
 
-**Why it is not done here:** it changes what a visitor sees on a path the client has not
-asked about, and the brief is a practice run against a real brief. It goes in the reply as
-a question with a price of "small change", not as a silent edit.
+**Why it took a client decision:** it changes what a visitor sees on a path nobody had
+asked about, so it went out as a question in the reply rather than as a silent edit. The
+client approved it.
 
 ---
 
@@ -238,7 +241,7 @@ exists — and it was not run first.
 | `spt-site`'s canonical points at `saiyingpunpt.com`, which does not resolve (NXDOMAIN, verified) | It is a separate live site. Changing it is the owner's call, and the fix is either buying the domain or repointing three URLs. It also changes what that project can honestly claim, so it should not happen silently. |
 | Stage 9 (custom domain) not executed | Needs a purchased domain. |
 | No image compression evidence on this site | The site ships no raster images. That acceptance item is covered by `portfolio` (486 KB → 44.8 KB), not here. |
-| `novalidate` leaves the no-JS path unvalidated (CR-7) | It changes what a visitor sees on a path nobody asked about. Offered to the client instead. |
+| ~~`novalidate` leaves the no-JS path unvalidated (CR-7)~~ | **Fixed** — the script sets `novalidate` at runtime instead of the markup setting it for everyone. A no-JS submission now gets the browser's native `required` check, and an incomplete one makes no request. |
 | Where Formspree files a submission (CR-6) | Not measurable from here, and it changes over time — early submissions to spam, later identical ones to the inbox. Resolved in practice: no spam since `12:17`. |
 | No real-device test on a phone | The 375px checks run in a browser with an emulated viewport. That is not a phone, and it is not described as one. |
 | ~~No real inbox confirmation for the form~~ | **Closed 2026-09-20** — the notification was read back from `hugoyuan2004@gmail.com`. See `docs/form-submission.md`. |
