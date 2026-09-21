@@ -563,7 +563,14 @@ section {
   font-size: 0.6875rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent);
+  /* `--accent` is 3.7:1 here, not 4.5:1, and this is 11px normal-weight text so the
+     4.5 threshold applies. The background is `--accent-soft`, a 10%-alpha accent wash
+     over `--panel`, and the composited result is what has to be measured — checking
+     `--accent` against flat `--panel` gives 4.19 and against flat `--page` gives 4.64,
+     both of which are the wrong number. `--accent-strong` measures 4.96 composited.
+     Found by Lighthouse's color-contrast audit; web-gzliu/contrast-check.mjs cannot
+     see it (that script checks the palette candidates, not this site). */
+  color: var(--accent-strong);
   background: var(--accent-soft);
   border-radius: var(--radius-pill);
   padding: 3px 10px;

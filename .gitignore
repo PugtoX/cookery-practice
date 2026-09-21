@@ -6,8 +6,10 @@ dist
 node_modules
 
 # Lighthouse reports are large; regenerate with:
-#   npx lighthouse <url> --output=json --output-path=docs/lighthouse/final.json
+#   npx lighthouse <url> --output=json --output-path=docs/lighthouse/mobile.report.json
+# docs/lighthouse/summary.md is the human-readable record and IS committed.
 docs/lighthouse/*.json
+docs/lighthouse/*.html
 
 # Editor and OS noise
 .vscode/*
