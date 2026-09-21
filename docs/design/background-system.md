@@ -78,6 +78,9 @@ scope by default.
 3. **Weak network / low-end devices.** First screen is HTML ≈12.4 KB + one stylesheet. Any
    added byte is a visible share of that. Zero new requests and zero raster images is the
    cheapest position available, and it is the one taken.
+   > **Corrected 2026-09-21 — the "zero raster images" half is no longer true.** See the
+   > correction block below the list. The reasoning is kept because it explains why the
+   > background layer was built the way it was.
 4. **Zero build step.** The site is served as written: no bundler, no minifier, no
    preprocessor. Comments ship. That is why the CSS block below is short and the long
    rationale lives here instead.
@@ -87,6 +90,35 @@ scope by default.
    metadata and is **never downloaded by a visitor**. This inverts the usual intuition
    about image cost and is recorded because a later "just add a hero photo" proposal would
    be the first real byte cost this site has ever paid.
+
+> ### ⚠️ Correction, 2026-09-21 — items 3 and 6 above are no longer true
+>
+> This list was written while the site had no images. It does now, so two of its six
+> constraints describe a site that no longer exists:
+>
+> | Then | Now (measured on the live URL, 2026-09-21) |
+> |---|---|
+> | "zero raster images" | **29 raster files** in `assets/img/` |
+> | "Zero `<img>` on the site" | **5 image requests on first load**; `assets/og.png` is still metadata-only |
+> | "pays zero image bytes" | **305.8 KiB of images of 322.1 KiB total transfer** — images are ~95% of the page |
+>
+> **The prediction at the end of item 6 came true and it was under-stated.** It said adding
+> a hero photo "would be the first real byte cost this site has ever paid" — the actual
+> result is that the first screen is now roughly **32×** its former size (10 KiB → 322 KiB),
+> and images are almost all of it. This is not a defect, but it does close the premise the
+> background layer was designed under, so anything below that still assumes "no images"
+> needs re-reading rather than trusting.
+>
+> Two of the targets further down are also worth measuring against, because they were
+> aspirational when written and the delivery does not meet them: the Raster table asks for
+> **≤40 KB for a hero** and the delivered `hero.avif` is **78.6 KiB**; it asks for
+> **≤15 KB below the fold** and `market-table.avif` is **108.9 KiB**. Both are unmet.
+>
+> Note on where that is recorded: `web-gzliu/readiness-gate.md` G5 tracks a **different
+> pair** of budgets (≤ 200 KiB total transfer, ≤ 100 KB per image) and does not mention the
+> 40 KB / 15 KB targets at all. The two failing figures above are therefore recorded **in
+> this file's own Raster table, and only here**. An earlier version of this note wrongly
+> attributed them to the gate's G5; corrected 2026-09-21.
 
 ### Locked (do not change without re-running the checkers)
 
@@ -384,7 +416,7 @@ wants one, these are the constraints it must respect.
 
 | Property | Specification |
 |---|---|
-| Reason to exist | Only if a photograph is ever added; there is currently no `<img>` on the site |
+| Reason to exist | Only if a photograph is ever added; there is currently no `<img>` on the site *(superseded 2026-09-21 — see the correction above; the site now has 29 raster files and 5 image requests on first load)* |
 | Format | AVIF first, WebP fallback, PNG only if neither is possible |
 | Budget | ≤ 40 KB for a hero, ≤ 15 KB for anything below the fold |
 | Dimensions | Provide 1× and 2×, never larger than the largest rendered size |
@@ -395,6 +427,13 @@ wants one, these are the constraints it must respect.
 **Note the asymmetry.** This site currently pays zero image bytes because `og.png` is
 metadata-only. Adding the first real image is a larger step than it looks and should be
 treated as its own decision with its own measurement.
+
+> **Superseded 2026-09-21.** The step described above has been taken: the site now ships
+> 29 raster files and pays **305.8 KiB** of image bytes on first load. Both statements in
+> this note are therefore false as written — `og.png` is still metadata-only, but the site
+> is no longer image-free. The `Budget` row above (≤40 KB hero / ≤15 KB below the fold) is
+> also unmet in delivery: `hero.avif` is 78.6 KiB and `market-table.avif` is 108.9 KiB.
+> Kept rather than deleted because it is the standard the delivery was measured against.
 
 ---
 

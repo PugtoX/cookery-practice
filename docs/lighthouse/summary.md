@@ -42,7 +42,7 @@ rather than trusting the exit code.
 | Largest Contentful Paint | 1.4 s |
 | Total Blocking Time | 10 ms |
 | Cumulative Layout Shift | 0 |
-| Total transfer | 322 KiB in 9 requests (313 KiB of it images) |
+| Total transfer | 322.1 KiB in 9 requests (305.8 KiB of it images, 5 requests — all AVIF) |
 
 **CLS 0 is the one that matters and it is not luck.** The four class pages declare
 `width`/`height` on their figures and the home page cards declare them too, so the boxes
@@ -121,6 +121,31 @@ Recorded, not chased.
 The site now transfers roughly 32× what it did before it had any photographs. The old
 number described a text-only page, and a better Performance score does not mean the
 images were free.
+
+**That 10 KiB baseline was later found to have been quoted beyond its lifetime.**
+`readiness-gate.md` still described this site as having zero images and transferring
+10 KiB while grading its performance gate, which made the image checks read as "not
+applicable". The gate row is now corrected and kept only with reservations. The lesson is
+about *scope of a baseline*, not about the number: 10 KiB was a true measurement of an
+earlier commit and became false the moment photographs landed, and nothing forced a
+re-measure.
+
+**The measured payload is AVIF only, and that matters for how the budget is read.**
+`network-requests` in this run shows **5 image requests, all AVIF, 305.8 KiB** — no WebP
+and no JPEG were fetched, because `<picture>` lists AVIF first. So the 322.1 KiB total is
+AVIF bytes, not a repository of unused large files. Separately, **four** JPEGs exceed
+300 KiB — `hero-2560.jpg` 756.0 KiB, `market-table.jpg` 530.8, `about.jpg` 386.0,
+**`hero.jpg` 326.7** — and none of them was fetched in this run. `hero.jpg` is the one
+that matters most, because it is the live fallback in the hero `<picture>` at
+`index.html:134`; `hero-2560.jpg` and `about.jpg` are referenced by nothing at all. The
+per-image budget is written per file, not per request, so all four still need either
+compression or a written reason, and neither exists yet.
+
+> **Correction, 2026-09-21.** An earlier version of this paragraph said "three JPEGs over
+> 300 KB" and omitted `hero.jpg`. That was the same undercount already corrected in
+> `web-gzliu/readiness-gate.md` G5, reproduced here while fixing this file — the count is
+> **four**. Of the four, only `hero.jpg` is referenced by any page in this repository
+> (`index.html:134`); `hero-2560.jpg` and `about.jpg` are referenced by nothing at all.
 
 ## SEO 100 is not the acceptance for the SEO work
 

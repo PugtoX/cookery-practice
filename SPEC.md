@@ -140,7 +140,7 @@ a missing feature is worse than one that names it:
 | A sticky call button | **Not built** | It is in the client's QA list. Adding it here would be a layout change to a site that is already through stage 5 acceptance; noted as a gap instead of quietly skipped. |
 | An FAQ accordion | **Not built** | Same reasoning as the sticky button. |
 | Real business content and prices | Placeholder content, AUD figures | The site is public; the workspace rule is that previews carry no real names, brands or prices. |
-| Images, with alt text | No raster images at all | The brief asks for alt text "where missing or necessary". With no images, that check is **vacuously satisfied here and demonstrated only in `portfolio`** — not proven by this build. |
+| Images, with alt text | 29 raster images, with alt text | **This row is a later correction.** When first written the build had no images and the alt-text check was recorded as vacuously satisfied. Photographs were added afterwards, so the check now has real material — and it immediately produced three defects that no code review would have caught: three home-page card alts described the wrong picture (purple aubergines written as "purple onions"), the declared `width`/`height` matched the JPEG fallback rather than the AVIF actually served, and the `srcset` named an `-800` file that does not exist. All three are recorded in `change-requests.md` CR-9/CR-10. |
 | A live domain | A `github.io` sub-path | Stage 9 is not executed; see `readiness-gate.md` G2. |
 
 ### Explicitly out of scope for the client's money (matches his "important" note)
