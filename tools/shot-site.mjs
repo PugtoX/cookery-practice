@@ -34,7 +34,11 @@ const server = createServer((q, r) => {
   r.writeHead(200, { 'content-type': T[extname(f)] || 'application/octet-stream' }).end(b)
 })
 await new Promise((r) => server.listen(0, '127.0.0.1', r))
-const url = `http://127.0.0.1:${server.address().port}${BASE}/`
+// Set LIVE_URL to shoot the deployed site instead of the local build. This exists
+// because passing a Chrome path into an inline `node -e` script through PowerShell
+// needs three levels of nested quoting and failed every single time it was tried;
+// an env var is the boring fix.
+const url = process.env.LIVE_URL ?? `http://127.0.0.1:${server.address().port}${BASE}/`
 
 const browser = await puppeteer.launch({
   executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`,
@@ -94,7 +98,8 @@ console.log(JSON.stringify(bands, null, 2))
 writeFileSync(`${process.env.TEMP}/live-home.png`, await page.screenshot({ fullPage: false }))
 
 // A class page: no hero, page-head texture, wide container.
-await page.goto(url + 'classes/knife-skills/', { waitUntil: 'networkidle2' })
+// Trailing slash on LIVE_URL would otherwise produce a doubled "//" path.
+await page.goto(new URL('classes/knife-skills/', url).href, { waitUntil: 'networkidle2' })
 writeFileSync(`${process.env.TEMP}/live-class.png`, await page.screenshot({ fullPage: false }))
 
 await browser.close()
