@@ -25,8 +25,8 @@ The `.json` and `.html` outputs are gitignored (500–900 kB each). This file is
 
 | Category | Score |
 |---|---|
-| Performance | **100** |
-| Accessibility | **96** |
+| Performance | **98** |
+| Accessibility | **100** |
 | Best Practices | **100** |
 | SEO | **100** |
 
@@ -38,15 +38,29 @@ The `.json` and `.html` outputs are gitignored (500–900 kB each). This file is
 | Largest Contentful Paint | 1.4 s |
 | Total Blocking Time | 0 ms |
 | Cumulative Layout Shift | 0 |
-| Speed Index | 1.8 s |
-| Total transfer | 336 KiB in 9 requests |
+| Speed Index | 3.9 s |
+| Total transfer | 329 KiB in 9 requests |
+
+**Run-to-run variance is large and is not a regression.** Two runs of the *same* build
+bracketed the `.tag` fix, which changed one text colour and nothing else:
+
+| | run 1 | run 2 |
+|---|---|---|
+| Performance | 100 | 98 |
+| Speed Index | 1.8 s | 3.9 s |
+| LCP | 1.4 s | 1.4 s |
+| TBT / CLS | 0 ms / 0 | 0 ms / 0 |
+
+Speed Index more than doubled with no code change behind it. Judge LCP, TBT and CLS —
+stable across both — and not the rounded score or SI. The pre-redesign record made the
+same observation (97 and 99 on the same day).
 
 **CLS 0** is the one that matters most here and it is not luck: the four class pages
 declare `width`/`height` on their figures, so the box is reserved before the bytes
 arrive. It was 0 before the photographs existed too, so it is a real measurement rather
 than an absent one.
 
-## Accessibility 96 — one real defect, and it is pre-existing
+## Accessibility — one real defect, found and fixed (and it is pre-existing)
 
 The only failing audit is `color-contrast`:
 
@@ -66,7 +80,7 @@ the photograph change never touched. Lighthouse had simply never been run on thi
 
 Fixed by painting `.tag` with `--accent-strong` (already a token in this palette):
 **4.96:1**. Re-verified by redeploying and re-running this audit — Accessibility is
-**100** in the run recorded below.
+**100** and `color-contrast` passes in the run recorded at the top of this file.
 
 ## Why the SEO score is not the acceptance for SEO work
 
@@ -83,11 +97,11 @@ all 8 subresources at a 600 s TTL. That is the GitHub Pages default; nothing in 
 repository can change it. It is recorded so it is not mistaken for a build defect.
 
 **On mobile, all five photographs load, and that is a design assumption that does not
-hold.** Total image transfer is 320 KiB of the 336 KiB. The home page hero is lazy-free
+hold.** Total image transfer is 320 KiB of the 329 KiB. The home page hero is lazy-free
 by design, but the four card images carry `loading="lazy"` on the assumption that cards
 sit below the fold — true at 1280px, false at the 412px emulated viewport, where the
 cards stack to one column and every one of them is near the first screen. The
-photographs cost 10 KiB → 336 KiB against the zero-image baseline below.
+photographs cost 10 KiB → 329 KiB against the zero-image baseline below.
 
 `image-delivery-insight` also reports ~87 KiB of avoidable bytes: `market-table.avif`
 (800px wide, displayed 660px) wastes 56.8 kB, `bread-baking.avif` 19.8 kB,
@@ -98,13 +112,13 @@ images do not. Not fixed here — record only.
 
 | | then | now |
 |---|---|---|
-| Performance | 98 | 100 |
+| Performance | 98 | 100 → 98 (see variance above) |
 | Accessibility | 100 | 96 → **100** after the `.tag` fix |
 | Best Practices | 100 | 100 |
 | SEO | 100 | 100 |
 | LCP | 1.3 s | 1.4 s |
 | CLS | 0 | 0 |
-| Total transfer | **10 KiB** | **336 KiB** |
+| Total transfer | **10 KiB** | **329 KiB** |
 
 Performance rose while the site gained 320 KiB of images. Read that as evidence the
 score is not a contract, not as evidence the images were free: per visit the site now
