@@ -242,6 +242,20 @@ apart in their heads or footers. **The HTML files are the source now.** They are
 run by the build. Re-run one only when a structural change has to reach several pages
 at once, and expect to lose any hand edits to those pages when you do.
 
+**`npm run build` does not run them, and that has already bitten once.** Editing a
+generator and then building produces a `dist/` that still contains the old page — the
+build copies whatever the `.html` files currently say. The order is generator first,
+then build:
+
+```bash
+node tools/gen-content-pages.mjs   # or gen-class-pages.mjs
+npm run build
+```
+
+Both generators are deterministic: re-running them with no generator edit leaves every
+page byte-identical apart from the one you changed. Verify that rather than trust it —
+`git status --short` after a run should list only the pages you meant to touch.
+
 ## What this deliberately does not have
 
 - No framework, no bundler, no TypeScript.
