@@ -37,8 +37,11 @@ await new Promise((r) => server.listen(0, '127.0.0.1', r))
 // Set LIVE_URL to shoot the deployed site instead of the local build. This exists
 // because passing a Chrome path into an inline `node -e` script through PowerShell
 // needs three levels of nested quoting and failed every single time it was tried;
-// an env var is the boring fix.
-const url = process.env.LIVE_URL ?? `http://127.0.0.1:${server.address().port}${BASE}/`
+// an env var is the boring fix. With LIVE_URL set the server is closed again before
+// the browser opens, so this cannot collide with whatever already holds a port.
+const live = process.env.LIVE_URL
+if (live) server.close()
+const url = live ?? `http://127.0.0.1:${server.address().port}${BASE}/`
 
 const browser = await puppeteer.launch({
   executablePath: String.raw`C:\Program Files\Google\Chrome\Application\chrome.exe`,
@@ -47,9 +50,17 @@ const browser = await puppeteer.launch({
 })
 const page = await browser.newPage()
 await page.setViewport({ width: 1280, height: 900 })
+// Against the live site, force everything through the network. Without this Chrome
+// serves the previously-shoot files from its disk cache and the screenshots come back
+// byte-identical to the local run — which looks like proof of a live render and is not.
+if (live) await page.setCacheEnabled(false)
+const seen = []
 const failed = []
 page.on('requestfailed', (r) => failed.push(r.url()))
-page.on('response', (r) => { if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`) })
+page.on('response', (r) => {
+  seen.push(`${r.status()} ${r.url()}`)
+  if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`)
+})
 await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 })
 await page.evaluate(() => new Promise((res) => setTimeout(res, 800)))
 
@@ -123,6 +134,7 @@ const shots = [
   ['classes/knife-skills.html', 'live-class-375.png', { width: 375, height: 812 }],
   ['classes/market-table.html', 'live-class-market.png', { width: 1280, height: 900 }],
 ]
+console.log(`target: ${url}${live ? '  (live, cache disabled)' : '  (local build)'}`)
 for (const [path, name, viewport] of shots) {
   await page.setViewport(viewport)
   await page.goto(new URL(path, url).href, { waitUntil: 'networkidle2', timeout: 60000 })
