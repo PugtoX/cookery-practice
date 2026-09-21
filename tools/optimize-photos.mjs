@@ -19,6 +19,24 @@ const DIR = 'E:/AI/AI_Agent/workplace/cookery-practice/docs/redesign/img'
 // The four card photographs gained a 400px variant because the cards are one column at
 // 375px: there the browser needs only about 345 CSS px, and shipping the 800px file cost
 // roughly 87 KiB. Measured by Lighthouse's image-delivery insight, not estimated.
+//
+// AVIF_CRF is 40, not the 32 these files were first encoded at. At crf 32 the five files a
+// visitor actually downloads totalled 305.8 KiB and the first load was 322.1 KiB — over this
+// site's own 200 KiB budget (SPEC.md section 2). crf 40 brought that to 187.3 KiB, still
+// 3.5 KiB over the line, so hero and market-table were then taken to 44 (see the per-slot
+// overrides below). Re-running this script would restore 40 for those two, which costs
+// about 26 KiB — recorded here so that is a deliberate act rather than a silent regression.
+// The JPEG fallbacks are deliberately left at their original size: no current browser
+// requests them (AVIF is first in `<picture>`), so re-encoding them would cost quality for
+// bytes nobody downloads.
+const AVIF_CRF = 40
+
+// Slots pushed one step harder after the crf-40 measurement. Each entry is a real
+// measurement, not a guess: crf 40 gave hero 42.1 KiB and market-table 75.0 KiB on the
+// wire, and the first load needed to shed 3.5 KiB. Verified by eye at 2x after encoding —
+// hero is a dark, low-detail frame and market-table keeps its box text and leaf edges.
+const AVIF_CRF_OVERRIDE = { hero: 44, 'market-table': 44 }
+
 const PLAN = [
   { slot: 'hero', widths: [1600, 2560] },
   { slot: 'knife-skills', widths: [800, 400] },
@@ -52,7 +70,7 @@ for (const { slot, widths } of PLAN) {
       run(['-y', '-hide_banner', '-loglevel', 'error', '-i', src, '-vf', scale, '-c:v', 'libwebp', '-quality', '80', outWebp])
     } catch { /* leave the file absent; reported below */ }
     try {
-      run(['-y', '-hide_banner', '-loglevel', 'error', '-i', src, '-vf', scale, '-c:v', 'libaom-av1', '-crf', '32', '-b:v', '0', '-still-picture', '1', outAvif])
+      run(['-y', '-hide_banner', '-loglevel', 'error', '-i', src, '-vf', scale, '-c:v', 'libaom-av1', '-crf', String(AVIF_CRF_OVERRIDE[base] ?? AVIF_CRF), '-b:v', '0', '-still-picture', '1', outAvif])
     } catch { /* ditto */ }
     const size = (p) => (existsSync(p) ? statSync(p).size : null)
     const w1 = size(outWebp)
