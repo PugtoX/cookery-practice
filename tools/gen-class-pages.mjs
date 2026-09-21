@@ -61,9 +61,9 @@ const classes = [
     dates: 'This class runs on Saturdays and Sundays, starting at 9am. Ask us for the next available date and we will reply within one working day.',
     // The same photograph the home page card for this class uses, so one file serves
     // both slots — a visitor who clicked through has already fetched it. Intrinsic
-    // sizes differ per slot (measured: 800x534 here, 1280x853 knife, 1280x960 market);
-    // the CSS crops them all to 3:2, and the width/height below are the real pixel
-    // dimensions, which is what the browser needs to reserve the right box.
+    // sizes differ per slot; the CSS crops them all to 3:2. `w`/`h` are what the
+    // browser actually receives, i.e. the AVIF/WebP derivative, which is not always
+    // the JPEG's size (market-table: 800x600 served, 1280x960 JPEG).
     img: {
       file: 'bread-baking',
       alt: 'A floured round sourdough loaf with a scored top, held in two hands',
@@ -147,8 +147,8 @@ const classes = [
     img: {
       file: 'market-table',
       alt: 'Boxes of fresh vegetables and greens stacked on market tables',
-      w: 1280,
-      h: 960,
+      w: 800,
+      h: 600,
     },
     next: { href: '../classes/bread-baking.html', label: 'See the bread class' },
   },
@@ -254,6 +254,7 @@ const page = (c) => `<!doctype html>
                 alt="${c.img.alt}"
                 width="${c.img.w}"
                 height="${c.img.h}"
+                fetchpriority="high"
                 decoding="async"
               />
             </picture>

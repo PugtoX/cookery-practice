@@ -355,13 +355,17 @@ a {
 
 /* The class photograph, inside `.page-head` rather than beside it so it sits on the
    same 52rem measure as everything else. Crop is 3:2 to match the home page cards.
-   The source files are not all 3:2 (800x534, 1280x853, 1280x960), so `object-fit`
-   does the work — the width/height attributes in the markup carry the real pixel
-   dimensions, which is what reserves the box before the bytes arrive.
+   The served files are not all 3:2 (knife-skills 800x534, market-table 800x600), so
+   `object-fit: cover` does the work. Measured crop loss on the worst of them,
+   market-table at 4:3 into 3:2, is 11% of the height — 5.5% off the top and bottom —
+   and the subject survives it; the other three lose under 0.2%.
 
-   Deliberately no `loading="lazy"`: at 375px this figure clears the fold, and on the
-   desktop layout it sits just below it, which is exactly the case where lazy loading
-   costs a visible pop-in instead of saving bytes. */
+   Deliberately no `loading="lazy"`, and `fetchpriority="high"` instead: on these
+   pages this image IS the largest contentful paint. Measured at 1280x900 the figure
+   starts around y=400 of a 900px viewport, so roughly 94% of it is on the first
+   screen — it is not "below the fold" in any sense that would justify deferring it.
+   Deferring it would push LCP out, which is the opposite of the intent. This is the
+   same reasoning `index.html` records for the hero. */
 .page-head figure {
   margin: var(--step-2) 0 0;
   aspect-ratio: 3 / 2;

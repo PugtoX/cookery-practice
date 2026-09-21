@@ -272,6 +272,25 @@ exists — and it was not run first.
 并按页面逐个取图、**每个截图一个独立文件名**（旧版两次截图同名，失败时会留下上一次的字节，
 本身就是误判的温床）。修后实测 4 个视口 0 failed requests。
 
+### 独立审查（审查者 ≠ 实现者）与修复
+
+审查 subagent 独立复核了 `4b18ac8`，自己解析 JPEG SOF、逐张看图、在临时副本里重跑生成器。
+**无 blocker、无 high。** 它给出的 three findings 全部处理如下：
+
+| 级别 | 发现 | 处置 |
+|---|---|---|
+| **medium** | `style.css` 的 CSS 注释里「desktop 上图在折线下方」是**假的**：实测 1280x900 下图顶在 y≈400，即 **94% 落在首屏内**。而这句正是「不加 `lazy`」的依据 —— 维护者照着它做就会加上 `loading="lazy"`，**推迟本页 LCP** | **已改**。注释改用 LCP 论述（与 `index.html` hero 同一理由），并写出实测几何与 market-table 的 11% 裁切量 |
+| low | 该图是 LCP 元素却没有 `fetchpriority="high"`，而 `index.html:138` 对自家 LCP 图正是这么写的 | **已改**。四页 + 生成器模板都加上 |
+| low | `knife-skills`、`market-table` 声明的 `width/height` 匹配的是 **JPEG 回退**（1280x853 / 1280x960），不是浏览器实际收到的 **AVIF/WebP**（800x534 / 800x600）。对布局零影响，但与 `index.html` 的写法不一致 | **已改**为实际服务的尺寸。改前用**浏览器** `naturalWidth/Height` 实测确认（我自写的 AVIF/WebP 解析器给出 32x22 这类荒谬值，**判定不可信、不作证据**） |
+| low（nitpick） | `bread-baking` 的 alt 写「sourdough」，而照片只能看出是圆形、撒粉、割纹的面包 —— 「酸种」是编辑判断，不是画面内容 | **未改，并说明**：审查者自己判定「I do NOT consider it a defect」，且首页卡片 alt 用同一词。留作 alt 标准若收紧时的单独工单 |
+
+**审查者也纠了自己一次**：它一度怀疑三个 checker 脚本不存在（因为不在本仓库），
+README 第 118–124 行写明它们在姊妹项目 `../web-gzliu/` —— **该怀疑已撤回**。
+
+**我自己的简报失误**：派审时我描述该提交「6 个文件」，实际是 **8 个** ——
+漏列了 `tools/shot-site.mjs` 与 `change-requests.md`。审查者点出来了。
+它没有因此漏审（两个文件都读了），但**给审查者的输入清单本身也该被核对**。
+
 ### 验证（全部实跑）
 
 | 检查 | 结果 |
@@ -284,10 +303,15 @@ exists — and it was not run first.
 | `shot-site.mjs` | 首页 1280、课程页 1280、课程页 375、market 页 1280 —— 图均渲染，`overflow: 0`，0 failed requests |
 | CSS 爆炸半径 | 全站 `<figure>` 只有这 4 个，且都在 `.page-head` 内；另外 8 个页面各有 `.page-head` 但无 `<figure>`，不受影响 |
 | `git diff --stat`（classes） | 4 文件各 +13 行、**0 删除** —— 生成器覆写没有丢掉手改内容 |
+| 审查后修复的最终状态 | `structure` 47/47 · `seo` 232/232 · `viewport` 22/22 · `link-check` 0 断链 · `npm test` 13 pass / 0 fail；生成器仍幂等；`dist` 与源 SHA-256 同步；声明尺寸经**浏览器**实测与 AVIF 实际尺寸一致（800x534 / 800x600） |
 
-**遗留**：首页卡片图与本次 alt 不同（卡片文案按教学场景写，例如 "
+**遗留**：首页卡片的 alt 与课程页不同（卡片按教学场景写，例如 "
 Hands chopping red chillies on a wooden board"）。两者都指同一张照片但描述不同，
 **未动** —— 那是既有内容，不在本次范围。
+
+**审查者另外顺手发现、而我没有改的**（都在 `index.html`，本次未触碰）：卡片 alt 有两处不准
+（把紫茄子读成 "purple onions"；漏掉番茄又把烘焙纸说成 "board"），以及卡片声明 800x533
+而文件是 800x534（差 1px）。这些**只在 alt 标准收紧时才值得开工单**。
 
 ---
 
