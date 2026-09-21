@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Redesign direction — warm editorial</title>
+
+    <!--
+      Throwaway design preview for the A-direction redesign (Wix wh-1061 reference).
+      NOT part of the site: tools/build.mjs skips docs/ and the deploy workflow uploads
+      only dist/, so this is never published.
+
+      It links redesign.css, which mirrors assets/style.css token-for-token so the two
+      files can be diffed directly. Images are local files under docs/redesign/img/ so
+      the preview is self-contained and does not hotlink anyone's CDN.
+
+      The switcher at the top is preview chrome, not part of the design.
+    -->
+    <link rel="stylesheet" href="redesign.css" />
+  </head>
+  <body>
+    <div class="lv-bar">
+      <b>Redesign A：</b>
+      <button type="button" data-pick="wide" aria-pressed="true">52rem 编辑式</button>
+      <button type="button" data-pick="narrow" aria-pressed="false">34rem 现版版心</button>
+      <button type="button" data-pick="noserif" aria-pressed="false">系统无衬线（对照）</button>
+      <span class="lv-note">真实重构稿 · 按 <kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd> 切换</span>
+    </div>
+
+    <div class="lv-readout" id="readout"></div>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="#">Cookery Class</a>
+        <nav class="site-nav" aria-label="Main">
+          <ul>
+            <li><a href="#" aria-current="page">Home</a></li>
+            <li><a href="#">Classes</a></li>
+            <li><a href="#">Recipes</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- Hero: full-bleed photograph, serif display, white text over a scrim.
+           This is the single biggest thing the reference does that we do not. -->
+      <section class="hero">
+        <picture>
+          <source type="image/avif" srcset="img/hero.avif 1600w, img/hero-2560.avif 2560w" sizes="100vw" />
+          <source type="image/webp" srcset="img/hero.webp 1600w, img/hero-2560.webp 2560w" sizes="100vw" />
+          <img
+            class="hero__img"
+            src="img/hero.jpg"
+            alt="A cook at work in a warm kitchen"
+            width="3840"
+            height="2560"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </picture>
+        <div class="hero__scrim"></div>
+        <div class="wrap hero__inner">
+          <p class="eyebrow" style="color: rgba(255, 255, 255, 0.78)">Sydney · hands-on kitchen</p>
+          <h1>Cooking classes Sydney — for people who want to cook, not watch</h1>
+          <p class="lede">
+            Eight people to a class, one bench each, and you eat what you make. Knife skills, bread,
+            pasta and a Saturday market table — taught in a working kitchen in the city.
+          </p>
+          <div class="actions">
+            <a class="btn" href="#book">Ask us to call you back</a>
+            <a class="btn btn-ghost" href="#classes">See all classes</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Editorial block. The heading spans the full width; a short eyebrow holds the
+           left rail and the content sits to its right. See redesign.css for why the
+           heading is not in the rail: the reference template's rail only ever holds
+           two- or three-word headings, and ours are full sentences. -->
+      <section aria-labelledby="about-heading">
+        <div class="wrap editorial">
+          <h2 id="about-heading">A small kitchen, eight benches</h2>
+          <p class="eyebrow rail">About</p>
+          <div class="editorial__body">
+            <p>
+              We teach cooking the way it is learned at home — by doing it, badly at first, with
+              someone standing next to you who can see what went wrong.
+            </p>
+            <p class="muted">
+              Every class is hands-on and ends with a sit-down meal. Nothing is deep-fried, and no
+              class needs equipment you do not already have at home.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="classes-heading" id="classes">
+        <div class="wrap">
+          <h2 id="classes-heading">Classes you can book</h2>
+          <p class="muted">Every class is hands-on, and every class ends with a sit-down meal.</p>
+          <ul class="cards">
+            <li class="card">
+              <a class="card-link" href="#">
+                <picture>
+                  <source type="image/avif" srcset="img/knife-skills.avif" />
+                  <source type="image/webp" srcset="img/knife-skills.webp" />
+                  <img
+                    class="card__media"
+                    src="img/knife-skills.jpg"
+                    alt="Hands chopping red chillies on a wooden board"
+                    width="800"
+                    height="533"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <div class="card__body">
+                  <span class="tag">3 hours</span>
+                  <h3>Knife Skills Basics</h3>
+                  <p class="muted">Grip, sharpening and four cuts that cover most of what a recipe asks for.</p>
+                </div>
+              </a>
+            </li>
+            <li class="card">
+              <a class="card-link" href="#">
+                <picture>
+                  <source type="image/avif" srcset="img/bread-baking.avif" />
+                  <source type="image/webp" srcset="img/bread-baking.webp" />
+                  <img
+                    class="card__media"
+                    src="img/bread-baking.jpg"
+                    alt="A seeded sourdough loaf, cut open"
+                    width="800"
+                    height="533"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <div class="card__body">
+                  <span class="tag">5 hours</span>
+                  <h3>Bread Baking Fundamentals</h3>
+                  <p class="muted">A starter you keep, a loaf you shape, and the reason your last one was dense.</p>
+                </div>
+              </a>
+            </li>
+            <li class="card">
+              <a class="card-link" href="#">
+                <picture>
+                  <source type="image/avif" srcset="img/pasta-from-scratch.avif" />
+                  <source type="image/webp" srcset="img/pasta-from-scratch.webp" />
+                  <img
+                    class="card__media"
+                    src="img/pasta-from-scratch.jpg"
+                    alt="Fresh egg pasta being made by hand"
+                    width="800"
+                    height="533"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <div class="card__body">
+                  <span class="tag">3 hours</span>
+                  <h3>Pasta From Scratch</h3>
+                  <p class="muted">Egg dough by hand, two shapes, and a sauce built in the same pan.</p>
+                </div>
+              </a>
+            </li>
+            <li class="card">
+              <a class="card-link" href="#">
+                <picture>
+                  <source type="image/avif" srcset="img/market-table.avif" />
+                  <source type="image/webp" srcset="img/market-table.webp" />
+                  <img
+                    class="card__media"
+                    src="img/market-table.jpg"
+                    alt="A market stall piled with fresh produce"
+                    width="800"
+                    height="600"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <div class="card__body">
+                  <span class="tag">1 day</span>
+                  <h3>Saturday Market Table</h3>
+                  <p class="muted">Shop the market in the morning, cook a shared table by the afternoon.</p>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section aria-labelledby="how-heading">
+        <div class="wrap editorial">
+          <h2 id="how-heading">How a class runs</h2>
+          <p class="eyebrow rail">Four steps</p>
+          <div class="editorial__body">
+            <ol class="steps">
+              <li>You book a date and tell us about allergies or anything you do not eat.</li>
+              <li>You arrive fifteen minutes early — apron, knife and bench are already set up.</li>
+              <li>We cook together for the length of the class, tasting as we go.</li>
+              <li>You eat what you made, and take the recipe card home.</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="book-heading" id="book">
+        <div class="wrap editorial">
+          <h2 id="book-heading">Ask us to call you back</h2>
+          <p class="eyebrow rail">Callback</p>
+          <div class="editorial__body">
+            <p class="muted">
+              Leave a name and a number or email and we will get back to you within one working day.
+            </p>
+            <form novalidate>
+              <div class="form-field">
+                <label for="name">Your name</label>
+                <input id="name" name="name" type="text" autocomplete="name" maxlength="80" required />
+              </div>
+              <div class="form-field">
+                <label for="contact">Email or phone</label>
+                <span class="hint">Either is fine — whichever you would rather we used.</span>
+                <input id="contact" name="contact" type="text" autocomplete="email" maxlength="120" required />
+              </div>
+              <div class="form-field">
+                <label for="interest">Which class are you asking about?</label>
+                <select id="interest" name="interest" required>
+                  <option value="">Please choose one</option>
+                  <option>Knife Skills Basics</option>
+                  <option>Bread Baking Fundamentals</option>
+                  <option>Pasta From Scratch</option>
+                  <option>Saturday Market Table</option>
+                  <option>Not sure yet</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="notes">Anything we should know?</label>
+                <span class="hint">Allergies, dietary needs, or a date you have in mind. Optional.</span>
+                <textarea id="notes" name="notes" maxlength="800" rows="3"></textarea>
+              </div>
+              <button class="btn" type="submit">Send request</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="where-heading">
+        <div class="wrap editorial">
+          <h2 id="where-heading">Where we are</h2>
+          <p class="eyebrow rail">Visit</p>
+          <div class="editorial__body">
+            <dl class="facts">
+              <div>
+                <dt>Address</dt>
+                <dd>12 Example Lane, Sydney NSW 2000</dd>
+              </div>
+              <div>
+                <dt>Getting here</dt>
+                <dd>Five minutes from the station; street parking after 6pm</dd>
+              </div>
+              <div>
+                <dt>Accessibility</dt>
+                <dd>Step-free entry and an accessible bathroom</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="credits-heading" class="credits">
+        <div class="wrap">
+          <h2 id="credits-heading" class="credits__title">Photography</h2>
+          <ul class="credits__list">
+            <li>
+              Knife-work photography by Shixart1985, via Wikimedia Commons —
+              <a href="https://creativecommons.org/licenses/by/2.0/" rel="license noopener">CC BY 2.0</a>
+            </li>
+            <li>
+              Market produce by Aliceinthealice, via Wikimedia Commons —
+              <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="license noopener">CC0 1.0</a>
+            </li>
+            <li>
+              Hero, bread and pasta photography via Burst by Shopify, whose licence requires no
+              attribution — credited here as a courtesy.
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap editorial">
+        <div class="editorial__body">
+          <p class="brand">Cookery Class</p>
+          <address>12 Example Lane, Sydney NSW 2000</address>
+          <div class="legal">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+          </div>
+        </div>
+        <div class="editorial__body">
+          <ul>
+            <li><a href="mailto:hello@example.com">hello@example.com</a></li>
+            <li><a href="tel:+61200000000">(02) 0000 0000</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const body = document.body
+      const buttons = [...document.querySelectorAll('.lv-bar button[data-pick]')]
+      const out = document.getElementById('readout')
+
+      function measure() {
+        const wrap = document.querySelector('.hero .wrap').getBoundingClientRect()
+        const h1 = document.querySelector('h1')
+        const h1r = h1.getBoundingClientRect()
+        const ed = document.querySelector('.editorial')
+        const edr = ed.getBoundingClientRect()
+        const card = document.querySelector('.card').getBoundingClientRect()
+        const img = document.querySelector('.hero__img')
+        const vw = window.innerWidth
+        const w = Math.round(wrap.width)
+        out.innerHTML =
+          `视口      ${vw}px\n` +
+          `版心      <b>${w}px</b>  占视口 ${Math.round((w / vw) * 100)}%\n` +
+          `左右留白  ${Math.round(wrap.left)}px / ${Math.round(vw - wrap.right)}px\n` +
+          `hero 高   ${Math.round(document.querySelector('.hero').getBoundingClientRect().height)}px\n` +
+          `h1        ${Math.round(parseFloat(getComputedStyle(h1).fontSize))}px  ${getComputedStyle(h1).fontFamily.split(',')[0]}\n` +
+          `h1 行数   ${Math.round(h1r.height / parseFloat(getComputedStyle(h1).lineHeight))}\n` +
+          `卡片宽    <b>${Math.round(card.width)}px</b>\n` +
+          `编辑栏宽  ${Math.round(edr.width)}px  列 ${getComputedStyle(ed).gridTemplateColumns}\n` +
+          `hero 图   ${img.naturalWidth ? img.naturalWidth + '×' + img.naturalHeight : '未加载'}`
+      }
+
+      function pick(id) {
+        document.documentElement.dataset.mode = id
+        body.dataset.mode = id
+        for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.pick === id))
+        measure()
+      }
+      for (const b of buttons) b.addEventListener('click', () => pick(b.dataset.pick))
+      addEventListener('keydown', (e) => {
+        if (e.target.closest('input, textarea, select')) return
+        const map = { 1: 'wide', 2: 'narrow', 3: 'noserif' }
+        if (map[e.key]) pick(map[e.key])
+      })
+      addEventListener('resize', measure)
+      addEventListener('load', measure)
+      measure()
+    </script>
+  </body>
+</html>

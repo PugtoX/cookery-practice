@@ -120,8 +120,27 @@
     </header>
 
     <main id="main">
-      <section class="page-head">
-        <div class="wrap">
+      <!-- Hero: full-bleed photograph with white display type over a scrim.
+           `<picture>` serves AVIF, then WebP, then the JPEG fallback. The JPEG is the
+           largest file by far, so it exists only for browsers that support nothing
+           better. `fetchpriority="high"` because this image IS the largest contentful
+           paint; lazy-loading it would make LCP worse, not better. -->
+      <section class="hero hero--home">
+        <picture>
+          <source type="image/avif" srcset="assets/img/hero.avif 1600w, assets/img/hero-2560.avif 2560w" sizes="100vw" />
+          <source type="image/webp" srcset="assets/img/hero.webp 1600w, assets/img/hero-2560.webp 2560w" sizes="100vw" />
+          <img
+            class="hero__img"
+            src="assets/img/hero.jpg"
+            alt="A dark kitchen bench with a pan of greens, a worn chopping board and a rolling pin"
+            width="1600"
+            height="1066"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </picture>
+        <div class="hero__scrim"></div>
+        <div class="wrap hero__inner">
           <p class="eyebrow">Sydney · hands-on kitchen</p>
           <h1>Cooking classes Sydney — for people who want to cook, not watch</h1>
           <p class="lede">
@@ -135,6 +154,26 @@
         </div>
       </section>
 
+      <!-- Editorial block: heading across the width, short label in the left rail,
+           content to its right. The heading is deliberately NOT in the rail — ours are
+           full sentences where the reference template's are two words. See style.css. -->
+      <section aria-labelledby="about-heading">
+        <div class="wrap editorial">
+          <h2 id="about-heading">A small kitchen, eight benches</h2>
+          <p class="rail">About</p>
+          <div class="editorial__body">
+            <p>
+              We teach cooking the way it is learned at home — by doing it, badly at first, with
+              someone standing next to you who can see what went wrong.
+            </p>
+            <p class="muted">
+              Every class is hands-on and ends with a sit-down meal. Nothing is deep-fried, and no
+              class needs equipment you do not already have at home.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section aria-labelledby="classes-heading">
         <div class="wrap">
           <h2 id="classes-heading">Classes you can book</h2>
@@ -142,30 +181,90 @@
           <ul class="cards">
             <li class="card">
               <a class="card-link" href="classes/knife-skills.html">
-                <span class="tag">3 hours</span>
-                <h3>Knife Skills Basics</h3>
-                <p class="muted">Grip, sharpening and four cuts that cover most of what a recipe asks for.</p>
+                <picture>
+                  <source type="image/avif" srcset="assets/img/knife-skills.avif" />
+                  <source type="image/webp" srcset="assets/img/knife-skills.webp" />
+                  <img
+                    class="card__media"
+                    src="assets/img/knife-skills.jpg"
+                    alt="Hands chopping red chillies on a wooden board"
+                    width="800"
+                    height="533"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <div class="card__body">
+                  <span class="tag">3 hours</span>
+                  <h3>Knife Skills Basics</h3>
+                  <p class="muted">Grip, sharpening and four cuts that cover most of what a recipe asks for.</p>
+                </div>
               </a>
             </li>
             <li class="card">
               <a class="card-link" href="classes/bread-baking.html">
-                <span class="tag">5 hours</span>
-                <h3>Bread Baking Fundamentals</h3>
-                <p class="muted">A starter you keep, a loaf you shape, and the reason your last one was dense.</p>
+                <picture>
+                  <source type="image/avif" srcset="assets/img/bread-baking.avif" />
+                  <source type="image/webp" srcset="assets/img/bread-baking.webp" />
+                  <img
+                    class="card__media"
+                    src="assets/img/bread-baking.jpg"
+                    alt="Hands holding a freshly baked scored sourdough loaf"
+                    width="800"
+                    height="533"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <div class="card__body">
+                  <span class="tag">5 hours</span>
+                  <h3>Bread Baking Fundamentals</h3>
+                  <p class="muted">A starter you keep, a loaf you shape, and the reason your last one was dense.</p>
+                </div>
               </a>
             </li>
             <li class="card">
               <a class="card-link" href="classes/pasta-from-scratch.html">
-                <span class="tag">3 hours</span>
-                <h3>Pasta From Scratch</h3>
-                <p class="muted">Egg dough by hand, two shapes, and a sauce built in the same pan.</p>
+                <picture>
+                  <source type="image/avif" srcset="assets/img/pasta-from-scratch.avif" />
+                  <source type="image/webp" srcset="assets/img/pasta-from-scratch.webp" />
+                  <img
+                    class="card__media"
+                    src="assets/img/pasta-from-scratch.jpg"
+                    alt="A ball of fresh dough on a floured board with a rolling pin"
+                    width="800"
+                    height="533"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <div class="card__body">
+                  <span class="tag">3 hours</span>
+                  <h3>Pasta From Scratch</h3>
+                  <p class="muted">Egg dough by hand, two shapes, and a sauce built in the same pan.</p>
+                </div>
               </a>
             </li>
             <li class="card">
               <a class="card-link" href="classes/market-table.html">
-                <span class="tag">1 day</span>
-                <h3>Saturday Market Table</h3>
-                <p class="muted">Shop the market in the morning, cook a shared table by the afternoon.</p>
+                <picture>
+                  <source type="image/avif" srcset="assets/img/market-table.avif" />
+                  <source type="image/webp" srcset="assets/img/market-table.webp" />
+                  <img
+                    class="card__media"
+                    src="assets/img/market-table.jpg"
+                    alt="A market stall piled with fresh greens and purple onions"
+                    width="800"
+                    height="600"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <div class="card__body">
+                  <span class="tag">1 day</span>
+                  <h3>Saturday Market Table</h3>
+                  <p class="muted">Shop the market in the morning, cook a shared table by the afternoon.</p>
+                </div>
               </a>
             </li>
           </ul>
@@ -173,29 +272,34 @@
       </section>
 
       <section aria-labelledby="how-heading">
-        <div class="wrap">
+        <div class="wrap editorial">
           <h2 id="how-heading">How a class runs</h2>
-          <ol class="steps">
-            <li>You book a date and tell us about allergies or anything you do not eat.</li>
-            <li>You arrive fifteen minutes early — apron, knife and bench are already set up.</li>
-            <li>We cook together for the length of the class, tasting as we go.</li>
-            <li>You eat what you made, and take the recipe card home.</li>
-          </ol>
-          <p class="muted">
-            Classes run in a licensed kitchen. Nothing is deep-fried, and no class needs equipment
-            you do not already have at home.
-          </p>
+          <p class="rail">Four steps</p>
+          <div class="editorial__body">
+            <ol class="steps">
+              <li>You book a date and tell us about allergies or anything you do not eat.</li>
+              <li>You arrive fifteen minutes early — apron, knife and bench are already set up.</li>
+              <li>We cook together for the length of the class, tasting as we go.</li>
+              <li>You eat what you made, and take the recipe card home.</li>
+            </ol>
+            <p class="muted">
+              Classes run in a licensed kitchen. Nothing is deep-fried, and no class needs equipment
+              you do not already have at home.
+            </p>
+          </div>
         </div>
       </section>
 
       <section aria-labelledby="book-heading" id="book">
-        <div class="wrap">
+        <div class="wrap editorial">
           <h2 id="book-heading">Ask us to call you back</h2>
-          <p class="muted">
-            Leave a name and a number or email and we will get back to you within one working day.
-            If you would rather write to us directly, the
-            <a href="contact.html">contact page</a> has our email and phone number.
-          </p>
+          <p class="rail">Callback</p>
+          <div class="editorial__body">
+            <p class="muted">
+              Leave a name and a number or email and we will get back to you within one working day.
+              If you would rather write to us directly, the
+              <a href="contact.html">contact page</a> has our email and phone number.
+            </p>
 
           <!-- The action is a real endpoint, and method="POST" is what carries the
                submission. With the script running it preventDefaults and posts with
@@ -274,22 +378,53 @@
               <a href="contact.html">email or phone</a>.
             </p>
           </noscript>
+          </div>
+        </div>
+      </section>
+
+      <!-- Attribution is a licence obligation for the Wikimedia photographs, not
+           decoration. Remove a photograph and its row must go with it. -->
+      <section aria-labelledby="credits-heading" class="credits">
+        <div class="wrap">
+          <h2 id="credits-heading" class="credits__title">Photography</h2>
+          <ul class="credits__list">
+            <li>
+              <span
+                >Knife-work photograph by Shixart1985, via Wikimedia Commons —
+                <a href="https://creativecommons.org/licenses/by/2.0/" rel="license noopener">CC BY 2.0</a
+                >.</span
+              >
+            </li>
+            <li>
+              <span
+                >Market produce by Aliceinthealice, via Wikimedia Commons — CC0 1.0 public domain
+                <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="license noopener">licence</a
+                >.</span
+              >
+            </li>
+            <li>
+              Hero, bread and pasta photographs via Burst by Shopify, whose licence requires no
+              attribution — credited here as a courtesy.
+            </li>
+          </ul>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
-      <div class="wrap">
-        <p class="brand">Cookery Class</p>
-        <address>12 Example Lane, Sydney NSW 2000</address>
-        <ul>
-          <li><a href="mailto:hello@example.com">hello@example.com</a></li>
-          <li><a href="tel:+61200000000">(02) 0000 0000</a></li>
-          <li><a href="contact.html">Contact and opening hours</a></li>
-        </ul>
-        <div class="legal">
-          <a href="privacy.html">Privacy</a>
-          <a href="terms.html">Terms</a>
+      <div class="wrap editorial">
+        <div class="editorial__body">
+          <p class="brand">Cookery Class</p>
+          <address>12 Example Lane, Sydney NSW 2000</address>
+          <ul>
+            <li><a href="mailto:hello@example.com">hello@example.com</a></li>
+            <li><a href="tel:+61200000000">(02) 0000 0000</a></li>
+            <li><a href="contact.html">Contact and opening hours</a></li>
+          </ul>
+          <div class="legal">
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+          </div>
         </div>
       </div>
     </footer>

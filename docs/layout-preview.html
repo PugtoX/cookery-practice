@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>版式重构对比 — 现版 / 44 / 52 / 60rem</title>
+
+    <!--
+      Throwaway design preview. NOT part of the site: tools/build.mjs skips docs/, and
+      the deploy workflow uploads only dist/, so this is never published.
+
+      It loads ../assets/style.css verbatim, so the CURRENT column is the real site.
+      Only the candidate rules are added here, and they are added the same way they
+      would be in style.css — as variable overrides — so that what you see is what
+      would ship, not an approximation.
+
+      Delete this file when the layout decision is made.
+    -->
+    <link rel="stylesheet" href="../assets/style.css" />
+    <style>
+      /* ============================================================
+         Switcher chrome — .lv-* only, never shipped
+         ============================================================ */
+      .lv-bar {
+        position: sticky;
+        top: 0;
+        z-index: 60;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        padding: 8px 16px;
+        background: #12180f;
+        color: #f7f8f3;
+        font-size: 0.875rem;
+      }
+      .lv-bar b { font-weight: 600; margin-right: 4px; }
+      .lv-bar button {
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid #57614b;
+        background: #1c2416;
+        color: #f7f8f3;
+        font: inherit;
+        cursor: pointer;
+      }
+      .lv-bar button[aria-pressed="true"] {
+        background: #3f6212;
+        border-color: #6b9a2a;
+        font-weight: 600;
+      }
+      .lv-bar .lv-note { opacity: 0.75; margin-left: auto; }
+
+      /* Live geometry readout — the point of this preview. */
+      .lv-readout {
+        position: fixed;
+        right: 12px;
+        bottom: 12px;
+        z-index: 70;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(18, 24, 15, 0.92);
+        color: #f7f8f3;
+        font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        white-space: pre;
+        pointer-events: none;
+      }
+      .lv-readout b { color: #b6d97a; font-weight: 600; }
+
+      /* ============================================================
+         CANDIDATE RULES
+         Exactly what would go into style.css. The [data-lv] attribute is the
+         preview's stand-in for "this build"; the declarations themselves are the
+         proposed ones and are unchanged from what ships.
+         ============================================================ */
+      [data-lv="44"] { --measure: 44rem; }
+      [data-lv="52"] { --measure: 52rem; }
+      [data-lv="60"] { --measure: 60rem; }
+
+      /* --measure-text and --gutter are proposed additions to :root.
+         --measure-text is in rem, NOT ch. `ch` is the width of the "0" glyph: measured
+         at 10.56px in the 18px lede, so 66ch resolved to 697px — wider than the whole
+         container, which capped nothing and produced 95-character lines. Measured
+         instead: 34rem (544px) gives 69 characters per line, max 72. 40rem gives 81,
+         which is too long. */
+      [data-lv]:not([data-lv="now"]) {
+        --measure-text: 34rem;
+        --gutter: clamp(1rem, 4vw, 2.5rem);
+        --step-block: var(--step-2);
+      }
+
+      /* Proposed: .wrap padding uses --gutter instead of a flat --step-0. */
+      [data-lv]:not([data-lv="now"]) .wrap {
+        padding-left: var(--gutter);
+        padding-right: var(--gutter);
+      }
+
+      /* Proposed: cap prose line length so a wider container does not widen the lines.
+         One selector covers every prose block: `.wrap > p` matches the lede, every
+         section paragraph, and the footer brand. */
+      [data-lv]:not([data-lv="now"]) .wrap > p {
+        max-width: var(--measure-text);
+      }
+
+      /* Proposed: tighten the doubled vertical rhythm. */
+      [data-lv]:not([data-lv="now"]) section {
+        padding-top: var(--step-3);
+        padding-bottom: var(--step-block);
+      }
+    </style>
+  </head>
+  <body data-lv="now">
+    <div class="lv-bar">
+      <b>版式：</b>
+      <button type="button" data-pick="now" aria-pressed="true">现版 34rem</button>
+      <button type="button" data-pick="44" aria-pressed="false">44rem</button>
+      <button type="button" data-pick="52" aria-pressed="false">52rem</button>
+      <button type="button" data-pick="60" aria-pressed="false">60rem</button>
+      <span class="lv-note">真实样式表 · 按 <kbd>0</kbd>/<kbd>4</kbd>/<kbd>5</kbd>/<kbd>6</kbd> 切换</span>
+    </div>
+
+    <div class="lv-readout" id="readout"></div>
+
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="#">Cookery Class</a>
+        <nav class="site-nav" aria-label="Main">
+          <ul>
+            <li><a href="#" aria-current="page">Home</a></li>
+            <li><a href="#">Classes</a></li>
+            <li><a href="#">Recipes</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="page-head">
+        <div class="wrap">
+          <p class="eyebrow">Sydney · hands-on kitchen</p>
+          <h1>Cooking classes Sydney — for people who want to cook, not watch</h1>
+          <p class="lede">
+            Eight people to a class, one bench each, and you eat what you make. Knife skills, bread,
+            pasta and a Saturday market table — all taught in a working kitchen in the city.
+          </p>
+          <div class="actions">
+            <a class="btn" href="#">Ask us to call you back</a>
+            <a class="btn btn-ghost" href="#">See all classes</a>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="classes-heading">
+        <div class="wrap">
+          <h2 id="classes-heading">Classes you can book</h2>
+          <p class="muted">Every class is hands-on, and every class ends with a sit-down meal.</p>
+          <ul class="cards">
+            <li class="card">
+              <a class="card-link" href="#">
+                <span class="tag">3 hours</span>
+                <h3>Knife Skills Basics</h3>
+                <p class="muted">Grip, sharpening and four cuts that cover most of what a recipe asks for.</p>
+              </a>
+            </li>
+            <li class="card">
+              <a class="card-link" href="#">
+                <span class="tag">5 hours</span>
+                <h3>Bread Baking Fundamentals</h3>
+                <p class="muted">A starter you keep, a loaf you shape, and the reason your last one was dense.</p>
+              </a>
+            </li>
+            <li class="card">
+              <a class="card-link" href="#">
+                <span class="tag">3 hours</span>
+                <h3>Pasta From Scratch</h3>
+                <p class="muted">Egg dough by hand, two shapes, and a sauce built in the same pan.</p>
+              </a>
+            </li>
+            <li class="card">
+              <a class="card-link" href="#">
+                <span class="tag">1 day</span>
+                <h3>Saturday Market Table</h3>
+                <p class="muted">Shop the market in the morning, cook a shared table by the afternoon.</p>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section aria-labelledby="how-heading">
+        <div class="wrap">
+          <h2 id="how-heading">How a class runs</h2>
+          <ol class="steps">
+            <li>You book a date and tell us about allergies or anything you do not eat.</li>
+            <li>You arrive fifteen minutes early — apron, knife and bench are already set up.</li>
+            <li>We cook together for the length of the class, tasting as we go.</li>
+            <li>You eat what you made, and take the recipe card home.</li>
+          </ol>
+          <p class="muted">
+            Classes run in a licensed kitchen. Nothing is deep-fried, and no class needs equipment
+            you do not already have at home.
+          </p>
+        </div>
+      </section>
+
+      <section aria-labelledby="facts-heading">
+        <div class="wrap">
+          <h2 id="facts-heading">Where we are</h2>
+          <dl class="facts">
+            <div>
+              <dt>Address</dt>
+              <dd>12 Example Lane, Sydney NSW 2000</dd>
+            </div>
+            <div>
+              <dt>Getting here</dt>
+              <dd>Five minutes from the station; street parking after 6pm</dd>
+            </div>
+            <div>
+              <dt>Accessibility</dt>
+              <dd>Step-free entry and an accessible bathroom</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p class="brand">Cookery Class</p>
+        <address>12 Example Lane, Sydney NSW 2000</address>
+        <ul>
+          <li><a href="mailto:hello@example.com">hello@example.com</a></li>
+          <li><a href="tel:+61200000000">(02) 0000 0000</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <script>
+      const body = document.body
+      const buttons = [...document.querySelectorAll('.lv-bar button[data-pick]')]
+      const out = document.getElementById('readout')
+
+      function measure() {
+        const wrap = document.querySelector('.page-head .wrap').getBoundingClientRect()
+        const lede = document.querySelector('.lede')
+        const lr = lede.getBoundingClientRect()
+        const range = document.createRange()
+        range.selectNodeContents(lede)
+        const longest = Math.max(...[...range.getClientRects()].map((x) => x.width))
+        const card = document.querySelector('.card').getBoundingClientRect()
+        const cs = getComputedStyle(document.querySelector('.wrap'))
+        const secs = [...document.querySelectorAll('main > section')]
+        const gap = (() => {
+          const a = [...secs[1].querySelectorAll('p,li,h2')].pop()
+          const b = [...secs[2].querySelectorAll('p,li,h2')][0]
+          if (!a || !b) return '—'
+          return Math.round(b.getBoundingClientRect().top - a.getBoundingClientRect().bottom) + 'px'
+        })()
+        const vw = window.innerWidth
+        const wrapW = Math.round(wrap.width)
+        out.innerHTML =
+          `视口      ${vw}px\n` +
+          `版心      <b>${wrapW}px</b>  (${cs.maxWidth})  占视口 ${Math.round((wrapW / vw) * 100)}%\n` +
+          `左右留白  ${Math.round(wrap.left)}px / ${Math.round(vw - wrap.right)}px\n` +
+          `正文行宽  最长 ${Math.round(longest)}px  (lede 框 ${Math.round(lr.width)}px)\n` +
+          `单张卡片  <b>${Math.round(card.width)}px</b>\n` +
+          `区块间距  ${gap}`
+      }
+
+      function pick(id) {
+        body.dataset.lv = id
+        for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.pick === id))
+        measure()
+      }
+      for (const b of buttons) b.addEventListener('click', () => pick(b.dataset.pick))
+      addEventListener('keydown', (e) => {
+        if (e.target.closest('input, textarea')) return
+        const map = { 0: 'now', 4: '44', 5: '52', 6: '60' }
+        if (map[e.key]) pick(map[e.key])
+      })
+      addEventListener('resize', measure)
+      measure()
+    </script>
+  </body>
+</html>

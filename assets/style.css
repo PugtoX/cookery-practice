@@ -1,8 +1,18 @@
 /* Cookery class site — hand-written CSS, no framework, no build step.
-   Palette: "Herb Garden" (candidate G in web-gzliu/palettes/index.html).
-   Body text and secondary text both measured >= 4.5:1 against --page and --panel
-   by web-gzliu/contrast-check.mjs; change a colour here and re-run it, because
-   the numbers recorded in that page go stale the moment this file changes.
+   Redesign direction A: warm editorial. Reference was the Wix wh-1061 template, at
+   the client's request; the palette, the type split and the editorial block are taken
+   from it.
+
+   Two things changed from the previous version of this file:
+
+   1. The brand colour moved from olive #3f6212 to a warm ochre, because the reference
+      is warm and the olive fought it. That invalidates the previously recorded
+      contrast numbers for palette G — re-run web-gzliu/contrast-check.mjs, do not
+      trust this comment.
+   2. The container widened from 34rem to 52rem, with prose capped separately at
+      34rem. One variable had been doing two jobs: limiting line length AND limiting
+      the whole layout. Measured at 1280px: the old container filled 43% of the
+      viewport with 248px cards; now 65% and 367px.
 
    Mobile first. 375px is the declared minimum width, not a "nice to have":
    viewport-check.mjs opens every page at 375px and fails on horizontal scroll.
@@ -11,28 +21,58 @@
    axe's 24px target-size rule, so axe passing does not mean this passes. */
 
 :root {
-  --accent: #3f6212;
-  --accent-soft: rgba(63, 98, 18, 0.1);
-  --page: #f7f8f3;
-  --panel: #ffffff;
-  --panel-hover: #f1f4ea;
-  --line: #e2e6d8;
-  --line-strong: #cbd3bb;
-  --fg: #12180f;
-  --muted: #57614b;
-  --grid: rgba(18, 24, 15, 0.05);
+  /* ---------- colour ---------- */
+  --page: #fdfdfd;
+  --panel: #f5f1e9;
+  --panel-hover: #efe9dd;
+  --line: #e4dccd;
+  --line-strong: #cdc0a9;
+  --fg: #362e22;
+  --muted: #6b6151;
+  --accent: #a8622f;
+  --accent-soft: rgba(168, 98, 47, 0.1);
+  --accent-strong: #8d4f24;
+  --grid: rgba(54, 46, 34, 0.05);
   /* Grid texture tile. 28px is 1.75rem at the 16px root, so the tile lands on the
-     4px rhythm the rest of the spacing uses. --grid held the colour from the start
-     and was referenced by nothing; this is the rule that finally consumes it. */
+     4px rhythm the rest of the spacing uses. */
   --grid-tile: 28px;
 
-  --measure: 34rem;
+  /* ---------- type ----------
+     A system serif for display. Probed on this machine: Georgia, Cambria,
+     Constantia, Garamond and Palatino are all present; ui-serif and ui-sans-serif
+     are NOT (they fall back), so the stack names real faces rather than keywords.
+     The benefit is measured, not a preference: at 77px the serif sets the home h1
+     in 3 lines where the sans needs 4, because the serif's narrower body fits more
+     per line. No webfont, so the site keeps zero external requests. */
+  --font-display: Garamond, Constantia, Cambria, Georgia, 'Times New Roman', serif;
+  --font-body: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --display-1: clamp(2.75rem, 6vw, 5rem);
+  --display-2: clamp(2rem, 4vw, 3.25rem);
+  --display-3: clamp(1.5rem, 2.4vw, 2rem);
+
   --step-0: 1rem;
   --step-1: 1.125rem;
   --step-2: 1.375rem;
   --step-3: 1.75rem;
   --step-4: 2.125rem;
-  --radius: 10px;
+
+  /* ---------- layout ---------- */
+  --measure: 52rem;        /* the container: cards, tables, media */
+  --measure-text: 34rem;   /* prose only: keeps lines at about 69 characters */
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --step-block: var(--step-2);
+  --radius: 4px;
+  --radius-pill: 999px;
+
+  /* ---------- hero ---------- */
+  --hero-min: clamp(24rem, 58vh, 40rem);
+  --hero-scrim: linear-gradient(
+    180deg,
+    rgba(20, 16, 10, 0.55) 0%,
+    rgba(20, 16, 10, 0.35) 45%,
+    rgba(20, 16, 10, 0.62) 100%
+  );
 }
 
 *,
@@ -49,9 +89,9 @@ body {
   margin: 0;
   background: var(--page);
   color: var(--fg);
-  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-body);
   font-size: var(--step-0);
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 /* Nothing may create horizontal scroll. Long words and unbreakable strings
@@ -78,7 +118,126 @@ a {
 .wrap {
   max-width: var(--measure);
   margin: 0 auto;
-  padding: 0 var(--step-0);
+  padding: 0 var(--gutter);
+}
+
+/* Prose keeps its own measure. Without this, widening the container would drag
+   body text out to 800px and past a comfortable line length. */
+.wrap > p,
+.editorial__body > p {
+  max-width: var(--measure-text);
+}
+
+/* Editorial block: the heading spans the width, a short label holds the left rail
+   and the content sits to its right.
+
+   The reference template puts its HEADINGS in the rail, but every heading it uses
+   there is two or three words ("About Us" measures 265px). Ours are full sentences:
+   "A small kitchen, eight benches" needs 650px, and a 650px rail inside an 832px
+   container leaves 138px for the prose — worse than the narrow column this redesign
+   exists to fix. So the heading takes the full width and a short label takes the
+   rail: the same rhythm, without squeezing display text into a box it does not fit. */
+.editorial {
+  display: grid;
+  gap: var(--step-1) var(--step-3);
+}
+
+.editorial__body > :first-child {
+  margin-top: 0;
+}
+
+.rail {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+
+@media (min-width: 48rem) {
+  .editorial {
+    grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr);
+    align-items: start;
+  }
+  .editorial > h1,
+  .editorial > h2 {
+    grid-column: 1 / -1;
+  }
+  .editorial > .rail {
+    grid-column: 1;
+    padding-top: 0.45em;
+  }
+  .editorial > .editorial__body {
+    grid-column: 2;
+  }
+  .site-footer .editorial {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .site-footer .editorial > .editorial__body {
+    grid-column: auto;
+  }
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--page);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-header .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 8px;
+  min-height: 64px;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* The brand lockup is a standalone navigation target, so it clears 44px like any
+   other. It is not an inline link inside a sentence: there is no other text in the
+   header for it to share a line with. Measured at 148x40 before this rule, which
+   failed viewport-check on all eleven pages. */
+.site-header .brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.site-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px var(--step-0);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9375rem;
+}
+
+.site-nav a[aria-current='page'] {
+  color: var(--fg);
+  font-weight: 600;
 }
 
 /* The skip link is off-screen until focused, but it still has a box, so it is a
@@ -95,152 +254,92 @@ a {
 }
 
 .skip-link:focus {
-  left: var(--step-0);
-  top: var(--step-0);
-  z-index: 10;
+  left: var(--gutter);
+  top: 8px;
+  z-index: 30;
   background: var(--panel);
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
 }
 
-/* ---------- Header ---------- */
+/* ---------- Hero ----------
+   A full-bleed photograph with white display type over a scrim. This is the largest
+   thing the redesign adds and also the site's first ever image bytes: the first
+   screen goes from about 23 KB to about 112 KB. See docs/redesign/photos.md. */
 
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  background: var(--page);
-  border-bottom: 1px solid var(--line);
+.hero {
+  position: relative;
+  display: grid;
+  align-items: end;
+  min-height: var(--hero-min);
+  overflow: hidden;
+  background: #241d14;
 }
 
-.site-header .wrap {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0 8px;
-  padding-top: 4px;
-  padding-bottom: 4px;
+.hero > picture {
+  position: absolute;
+  inset: 0;
+  display: block;
 }
 
-.brand {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--fg);
-  text-decoration: none;
-  letter-spacing: -0.01em;
+.hero__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* With no photograph present the hero must still look deliberate rather than
+     showing a broken-image glyph. The gradient is covered the moment a file exists. */
+  background-image:
+    radial-gradient(120% 90% at 20% 15%, rgba(168, 98, 47, 0.5) 0%, transparent 60%),
+    radial-gradient(100% 80% at 85% 90%, rgba(90, 62, 36, 0.65) 0%, transparent 60%),
+    linear-gradient(160deg, #3b2f22 0%, #241d14 100%);
 }
 
-.site-nav ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.hero__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--hero-scrim);
 }
 
-/* Measured at 375px: with 12px side padding and a 0.9375rem font the brand and the
-   five nav links did not fit on one line, so the header wrapped to two rows and the
-   sticky header permanently covered 145px of a 667px viewport — 22%. Nothing in the
-   acceptance criteria catches that (no horizontal scroll, every target 44px), which
-   is exactly why it was measured. Tightening the padding and the link size brings it
-   back to one row; the tap targets stay 44px tall. */
-.site-nav a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 8px;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 0.875rem;
+.hero__inner {
+  position: relative;
+  width: 100%;
+  padding: var(--step-3) 0 clamp(2rem, 5vw, 3.5rem);
 }
 
-.site-nav a:hover,
-.site-nav a[aria-current='page'] {
-  color: var(--fg);
+.hero h1,
+.hero .lede,
+.hero .eyebrow {
+  color: #fff;
 }
 
-.site-nav a[aria-current='page'] {
-  font-weight: 600;
+.hero h1 {
+  max-width: 22ch;
+  text-wrap: balance;
 }
 
-/* ---------- Typography ---------- */
-
-h1,
-h2,
-h3 {
-  line-height: 1.15;
-  letter-spacing: -0.015em;
-  margin: 0 0 var(--step-0);
+.hero .lede {
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 46ch;
 }
 
-h1 {
-  font-size: var(--step-4);
+.hero .eyebrow {
+  color: rgba(255, 255, 255, 0.78);
 }
 
-h2 {
-  font-size: var(--step-3);
-}
-
-h3 {
-  font-size: var(--step-2);
-}
-
-p {
-  margin: 0 0 var(--step-0);
-  overflow-wrap: break-word;
-}
-
-.lede {
-  font-size: var(--step-1);
-  color: var(--muted);
-}
-
-.muted {
-  color: var(--muted);
-}
-
-.eyebrow {
-  font-size: 0.8125rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 0 0 10px;
-}
-
-/* ---------- Sections ---------- */
-
-section {
-  padding: var(--step-3) 0;
-  border-bottom: 1px solid var(--line);
-}
-
-section:last-of-type {
-  border-bottom: 0;
-}
-
+/* ---------- Page head ----------
+   Non-home pages. Carries the grid texture the background work introduced, now on
+   the cream base. It must not touch `body`: the sticky header has an opaque
+   background and would cut a seam through it. Full rationale:
+   docs/design/background-system.md. */
 .page-head {
+  position: relative;
+  isolation: isolate;
   padding-top: var(--step-3);
 }
 
-/* ---------- Grid texture ----------
-   "Grid Paper" background direction: a 1px olive grid on the page-head and the
-   steps list, nothing else. It adds no bytes and no requests beyond these rules,
-   and no motion. Do not move it onto `body` — the sticky header has an opaque
-   `--page` background and would cut a seam through it. Full rationale and the
-   measured numbers: docs/design/background-system.md. */
-.page-head,
-ol.steps {
-  position: relative;
-  isolation: isolate;
-}
-
-.page-head::before,
-ol.steps::before {
+.page-head::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -254,16 +353,84 @@ ol.steps::before {
   mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
 }
 
+/* ---------- Typography ---------- */
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--step-0);
+}
+
+h1 {
+  font-size: var(--display-1);
+  font-weight: 700;
+}
+
+h2 {
+  font-size: var(--display-2);
+  font-weight: 700;
+  margin-bottom: var(--step-1);
+}
+
+h3 {
+  font-size: var(--display-3);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+p {
+  margin: 0 0 var(--step-0);
+}
+
+.lede {
+  font-size: var(--step-1);
+  color: var(--muted);
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 var(--step-0);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* ---------- Sections ---------- */
+
+section {
+  padding-top: var(--step-3);
+  padding-bottom: var(--step-block);
+}
+
+.section-tight {
+  padding-top: var(--step-2);
+}
+
 /* ---------- Buttons ---------- */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: var(--step-1) 0 0;
+}
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 48px;
-  padding: 0 20px;
-  border-radius: var(--radius);
-  font-size: var(--step-0);
+  padding: 0 24px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
   font-weight: 600;
   text-decoration: none;
   background: var(--accent);
@@ -272,7 +439,7 @@ ol.steps::before {
 }
 
 .btn:hover {
-  background: #2f4a0d;
+  background: var(--accent-strong);
 }
 
 .btn-ghost {
@@ -285,18 +452,21 @@ ol.steps::before {
   background: var(--panel-hover);
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: var(--step-1) 0 0;
+/* On a photograph the ghost button has to clear the scrim, not the page. */
+.hero .btn-ghost {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.65);
 }
 
-/* ---------- Cards and lists ---------- */
+.hero .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ---------- Cards ---------- */
 
 .cards {
   display: grid;
-  gap: var(--step-0);
+  gap: var(--step-1);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -308,10 +478,36 @@ ol.steps::before {
   }
 }
 
+.cards--three {
+  gap: var(--step-0);
+}
+
+@media (min-width: 48rem) {
+  .cards--three {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .card {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.card > picture,
+.card > img {
+  display: block;
+}
+
+.card__media {
+  aspect-ratio: 3 / 2;
+  width: 100%;
+  object-fit: cover;
+  background: var(--panel-hover);
+}
+
+.card__body {
   padding: var(--step-1);
 }
 
@@ -336,15 +532,17 @@ ol.steps::before {
 
 .tag {
   display: inline-block;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
   background: var(--accent-soft);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 3px 10px;
   margin-bottom: 10px;
 }
+
+/* ---------- Facts list ---------- */
 
 .facts {
   margin: 0;
@@ -380,55 +578,62 @@ ol.steps li {
   margin-bottom: 10px;
 }
 
-/* ---------- Form ---------- */
+/* ---------- Form ----------
+   Underline fields, from the reference. The border-bottom IS the visible field, so
+   a reset must not remove it; focus adds the outline, which keeps the ring visible
+   on a near-white page. */
 
 .form-field {
-  margin: 0 0 var(--step-1);
+  margin: 0 0 var(--step-2);
 }
 
 .form-field label {
   display: block;
-  font-weight: 600;
-  margin-bottom: 6px;
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
 }
 
 .form-field .hint {
   display: block;
   font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
   font-size: 0.875rem;
   color: var(--muted);
   margin-top: 4px;
 }
 
 input[type='text'],
-input[type='email'],
-input[type='tel'],
 select,
 textarea {
   width: 100%;
-  min-height: 48px;
-  padding: 10px 12px;
   font: inherit;
   color: var(--fg);
-  background: var(--panel);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  border-radius: 0;
+  padding: 10px 0;
+  min-height: 44px;
 }
 
 textarea {
-  min-height: 120px;
   resize: vertical;
 }
 
-input[aria-invalid='true'],
-textarea[aria-invalid='true'] {
-  border-color: #b91c1c;
-  border-width: 2px;
+input[type='text']:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-bottom-color: var(--accent);
 }
 
-/* Honeypot: hidden from people, still reachable by naive bots. Not display:none
-   plus aria-hidden is belt and braces — see viewport-check.mjs, which skips
-   anything inside [aria-hidden="true"] precisely because that is unreachable. */
+/* Honeypot. aria-hidden plus tabindex -1 keeps it away from screen readers and
+   keyboard users; naive bots fill it anyway. */
 .hp {
   position: absolute;
   left: -9999px;
@@ -438,8 +643,8 @@ textarea[aria-invalid='true'] {
 }
 
 .field-error {
-  color: #b91c1c;
-  font-size: 0.9375rem;
+  color: #7f1d1d;
+  font-size: 0.875rem;
   margin: 6px 0 0;
 }
 
@@ -447,8 +652,7 @@ textarea[aria-invalid='true'] {
   margin-top: var(--step-1);
   padding: 12px 14px;
   border-radius: var(--radius);
-  border: 1px solid var(--line-strong);
-  background: var(--panel);
+  border: 1px solid var(--line);
 }
 
 .form-status[data-state='error'] {
@@ -465,6 +669,41 @@ textarea[aria-invalid='true'] {
   display: none !important;
 }
 
+/* ---------- Credits ----------
+   Three of the five photographs are CC BY or CC0 from Wikimedia Commons, so this
+   block is a licence obligation rather than decoration. Deliberately quiet. */
+.credits {
+  padding: var(--step-2) 0;
+  border-top: 1px solid var(--line);
+}
+
+.credits__title {
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.credits__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: var(--measure-text);
+}
+
+.credits__list a {
+  color: var(--muted);
+  text-underline-offset: 2px;
+}
+
 /* ---------- Footer ---------- */
 
 .site-footer {
@@ -474,9 +713,13 @@ textarea[aria-invalid='true'] {
   font-size: 0.9375rem;
 }
 
-.site-footer h2 {
-  font-size: 1rem;
+.site-footer .brand {
   color: var(--fg);
+  font-size: 1.25rem;
+}
+
+.site-footer address {
+  font-style: normal;
 }
 
 .site-footer ul {
@@ -489,6 +732,8 @@ textarea[aria-invalid='true'] {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+  color: var(--accent);
+  text-decoration: none;
 }
 
 .site-footer .legal {
@@ -501,20 +746,20 @@ textarea[aria-invalid='true'] {
 /* The footer's own links must clear 44px in BOTH dimensions: they are standalone
    targets, not links inside a sentence, so the WCAG SC 2.5.5 inline exception does
    not apply. viewport-check.mjs fails on these. Measured: without the horizontal
-   padding "Privacy"/"Terms" came out 42px wide — 2px under — which is exactly the
-   kind of miss that eye-balling does not catch. */
+   padding "Privacy"/"Terms" came out 42px wide — 2px under.
+   inline-block, not inline-flex: an inline-flex box letting the flex container
+   dictate its cross size came out 42px wide on one run and 44px on another. */
 .site-footer .legal a {
   display: inline-block;
-  /* inline-block, not inline-flex: an inline-flex box letting the flex container
-     dictate its cross size came out 42px wide on one run and 44px on another.
-     A block-level box sizes to its own content, so the measurement is stable. */
   line-height: 44px;
   height: 44px;
   padding: 0 4px;
+  color: var(--accent);
+  text-decoration: none;
 }
 
-/* A standalone link that is NOT inside a sentence (contact details in a facts list,
-   a "see the class" link on its own line). Same reasoning as the footer links. */
+/* A standalone link that is NOT inside a sentence (contact details, legal pages)
+   also has to clear 44px in both dimensions. */
 .link-block {
   display: inline-flex;
   align-items: center;

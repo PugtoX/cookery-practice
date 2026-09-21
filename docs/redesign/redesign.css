@@ -1,0 +1,678 @@
+/* Cookery Class — redesign direction (Wix wh-1061 reference, warm editorial)
+ *
+ * This mirrors the shape of assets/style.css token-for-token so the two can be diffed
+ * directly. Values are read from the reference template, not invented:
+ *   page   #fdfdfd  (template body)
+ *   ink    #362e22  (template h2 colour, sampled)
+ *   accent #a8622f  (warm ochre, replaces the olive at the same AA margin)
+ *
+ * Type: system serif for display. No webfont, so the site keeps its zero-external-request
+ * property. Probed on this machine: Georgia, Cambria, Constantia, Garamond, Palatino
+ * are all present; ui-serif and ui-sans-serif are NOT (they fall back), so the stack
+ * names real faces rather than generic keywords.
+ */
+
+:root {
+  /* --- colour --- */
+  --page: #fdfdfd;
+  --panel: #f5f1e9;
+  --panel-hover: #efe9dd;
+  --line: #e4dccd;
+  --line-strong: #cdc0a9;
+  --fg: #362e22;
+  --muted: #6b6151;
+  --accent: #a8622f;
+  --accent-soft: rgba(168, 98, 47, 0.1);
+  --grid: rgba(54, 46, 34, 0.05);
+
+  /* --- type --- */
+  --font-display: Garamond, Constantia, Cambria, Georgia, 'Times New Roman', serif;
+  --font-body: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Display sizes replace the old single scale. Measured against the template's h1 at
+     119px; this is deliberately smaller because our hero is a screen, not a 2529px
+     canvas, and because 119px does not survive 375px. clamp() keeps the floor. */
+  --display-1: clamp(2.75rem, 6vw, 5rem);
+  --display-2: clamp(2rem, 4vw, 3.25rem);
+  --display-3: clamp(1.5rem, 2.4vw, 2rem);
+
+  /* --- text scale (kept from style.css so prose sizing does not change) --- */
+  --step-0: 1rem;
+  --step-1: 1.125rem;
+  --step-2: 1.375rem;
+  --step-3: 1.75rem;
+  --step-4: 2.125rem;
+
+  /* --- layout --- */
+  /* Wider container for the editorial layout; prose keeps its own measure, which is the
+     split the earlier audit identified. */
+  --measure: 52rem;
+  --measure-text: 34rem;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --radius: 4px;
+  --radius-pill: 999px;
+
+  /* --- hero --- */
+  --hero-min: clamp(26rem, 62vh, 44rem);
+  --hero-scrim: linear-gradient(
+      180deg,
+      rgba(20, 16, 10, 0.55) 0%,
+      rgba(20, 16, 10, 0.35) 45%,
+      rgba(20, 16, 10, 0.62) 100%
+    );
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.65;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Layout ---------- */
+
+.wrap {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.wrap > p {
+  max-width: var(--measure-text);
+}
+
+/* Editorial block.
+ *
+ * Measured decision, not a guess. The reference template uses a heading rail, but every
+ * heading it puts there is two or three words — "About Us" 265px, "Why Choose Us" 437px,
+ * "Testimonials" 348px, at 70px on an 858px container. All fit on one line.
+ *
+ * Our copy does not. Measured at 51.2px: "A small kitchen, eight benches" needs 650px,
+ * "Ask us to call you back" 484px. A 650px rail inside an 832px container leaves 138px
+ * for the prose, which is worse than the narrow column this redesign is trying to fix.
+ *
+ * So the rail is not used for headings. Instead the heading gets its own full-width row
+ * and the body sits beside a narrow label rail — the same editorial rhythm (a quiet left
+ * edge, content to the right) without forcing long display text into a narrow box.
+ */
+.editorial {
+  display: grid;
+  gap: var(--step-1) var(--step-3);
+}
+
+@media (min-width: 48rem) {
+  .editorial {
+    grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr);
+    align-items: start;
+  }
+  /* The heading spans both columns so it is never squeezed into the rail. */
+  .editorial > h2 {
+    grid-column: 1 / -1;
+  }
+  /* A short label holds the rail. This is what the reference actually puts in its left
+     column: a quiet, two-word anchor, not a display sentence. */
+  .editorial > .rail {
+    grid-column: 1;
+    margin: 0;
+    padding-top: 0.4em;
+  }
+  /* Content sits to the right of the rail, which is what produces the editorial indent. */
+  .editorial > .editorial__body {
+    grid-column: 2;
+  }
+  /* The body block starts at the container edge and relies on the grid column for its
+     position, so it needs no padding of its own — but a block that fills the second
+     column still needs the prose capped, which .wrap > p already does for direct
+     children. This rule covers paragraphs nested inside .editorial__body. */
+  .editorial__body > p {
+    max-width: var(--measure-text);
+  }
+  /* The footer has no heading, so its two blocks can share the row directly. */
+  .site-footer .editorial {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--step-1) var(--step-3);
+  }
+  .site-footer .editorial > .editorial__body {
+    grid-column: auto;
+  }
+}
+
+/* Below the breakpoint everything stacks; the classes stay so the markup is identical
+   at every width rather than differing between phone and desktop. */
+.editorial > .rail {
+  margin: 0;
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--page);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-header .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 8px;
+  min-height: 64px;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.site-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px var(--step-0);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9375rem;
+}
+
+.site-nav a[aria-current='page'] {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  position: relative;
+  display: grid;
+  align-items: end;
+  min-height: var(--hero-min);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #241d14;
+}
+
+.hero__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* While the photograph is missing, the hero must still look deliberate rather than
+     showing a broken-image glyph. A CSS gradient stands in and is covered the moment
+     the file exists. */
+  background-image:
+    radial-gradient(120% 90% at 20% 15%, rgba(168, 98, 47, 0.5) 0%, transparent 60%),
+    radial-gradient(100% 80% at 85% 90%, rgba(90, 62, 36, 0.65) 0%, transparent 60%),
+    linear-gradient(160deg, #3b2f22 0%, #241d14 100%);
+  font-size: 0;
+  color: transparent;
+}
+
+.hero__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--hero-scrim);
+}
+
+.hero__inner {
+  position: relative;
+  width: 100%;
+  padding: var(--step-3) 0 clamp(2rem, 5vw, 3.5rem);
+  color: #fff;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: var(--display-1);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: #fff;
+  margin: 0 0 var(--step-0);
+  max-width: 22ch;
+  text-wrap: balance;
+}
+
+.hero .lede {
+  font-size: var(--step-1);
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 46ch;
+  margin: 0 0 var(--step-1);
+}
+
+/* ---------- Buttons ---------- */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: var(--step-1) 0 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+}
+
+.btn:hover {
+  background: #8d4f24;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--line-strong);
+}
+
+.btn-ghost:hover {
+  background: var(--panel-hover);
+}
+
+/* The hero's secondary button sits on a photograph, so it is a light outline rather
+   than the page's dark ghost: it has to clear the scrim, not the page background. */
+.hero .btn-ghost {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+.hero .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ---------- Sections ---------- */
+
+section {
+  padding: var(--step-3) 0;
+}
+
+.section-tight {
+  padding-top: var(--step-2);
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: var(--display-2);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--step-1);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: var(--display-3);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 6px;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 var(--step-0);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* ---------- Cards ---------- */
+
+.cards {
+  display: grid;
+  gap: var(--step-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.card__media {
+  aspect-ratio: 3 / 2;
+  width: 100%;
+  object-fit: cover;
+  background: var(--panel-hover);
+}
+
+.card__body {
+  padding: var(--step-1);
+}
+
+.card h3 {
+  margin-bottom: 6px;
+}
+
+.card p:last-child {
+  margin-bottom: 0;
+}
+
+.card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-link:hover h3 {
+  text-decoration: underline;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  margin-bottom: 10px;
+}
+
+/* ---------- Facts ---------- */
+
+.facts {
+  margin: 0;
+  padding: 0;
+}
+
+.facts > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px var(--step-0);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.facts dt {
+  font-weight: 600;
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* ---------- Form: underline style, from the reference ---------- */
+
+.form-field {
+  margin: 0 0 var(--step-2);
+}
+
+.form-field label {
+  display: block;
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.form-field .hint {
+  display: block;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+input[type='text'],
+select,
+textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--fg);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  border-radius: 0;
+  padding: 10px 0;
+  min-height: 44px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input[type='text']:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-bottom-color: var(--accent);
+}
+
+/* ---------- Credits ----------
+   Five of the six photographs are CC BY or CC BY-SA and require attribution, so this
+   block is a licence obligation rather than an extra. It is deliberately quiet: small,
+   muted, low in the page, and it must not compete with the footer's own content. */
+.credits {
+  padding: var(--step-2) 0;
+  border-top: 1px solid var(--line);
+}
+
+.credits__title {
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.credits__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.credits__list a {
+  color: var(--muted);
+  text-underline-offset: 2px;
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: var(--step-3) 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.site-footer .brand {
+  color: var(--fg);
+}
+
+.site-footer address {
+  font-style: normal;
+}
+
+.site-footer ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer li a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.site-footer .legal {
+  margin-top: var(--step-1);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--step-1);
+}
+
+.site-footer .legal a {
+  display: inline-block;
+  line-height: 44px;
+  height: 44px;
+  padding: 0 4px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ---------- Preview chrome (never ships) ---------- */
+
+.lv-bar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 16px;
+  background: #241d14;
+  color: #f5f1e9;
+  font: 0.875rem var(--font-body);
+}
+
+.lv-bar button {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #6b6151;
+  background: #362e22;
+  color: #f5f1e9;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lv-bar button[aria-pressed='true'] {
+  background: #a8622f;
+  border-color: #c98a55;
+  font-weight: 600;
+}
+
+.lv-bar .lv-note {
+  opacity: 0.8;
+  margin-left: auto;
+}
+
+.lv-readout {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 70;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(36, 29, 20, 0.93);
+  color: #f5f1e9;
+  font: 12px/1.5 ui-monospace, Consolas, monospace;
+  white-space: pre;
+  pointer-events: none;
+}
+
+.lv-readout b {
+  color: #e8b98a;
+  font-weight: 600;
+}
+
+/* ============================================================
+   Comparison modes. Preview-only: these are the three things worth judging
+   side by side, not three shipping variants.
+   ============================================================ */
+
+/* 1 — the proposal: 52rem container, editorial two-column, serif display. Default. */
+
+/* 2 — the same design at the OLD 34rem container, so the widening can be judged
+       independently of the rest of the redesign. */
+[data-mode='narrow'] {
+  --measure: 34rem;
+}
+
+/* 3 — no serif. Answers "is the serif carrying its weight, or is the layout doing the
+       work?" If this looks nearly as good, the display face is a preference, not a
+       requirement, and the system stack stays. */
+[data-mode='noserif'] {
+  --font-display: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* At 34rem the two-column editorial block has no room for a rail, so it collapses —
+   which is exactly what happens on a phone, so the behaviour is already proven. */
+[data-mode='narrow'] .editorial {
+  grid-template-columns: minmax(0, 1fr);
+}
+

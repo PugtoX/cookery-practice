@@ -195,6 +195,42 @@ error, because it is the one nobody re-checks.**
 
 ---
 
+## CR-8 · Six licence-clean photographs, four unusable on sight — and a cleanup that broke a contract
+
+**Found by:** a sourcing round that returned six images, all with correct licences and
+readable permission chains, from Wikimedia Commons. Then the images were actually opened.
+
+Four failed immediately:
+
+- **hero** — a commercial restaurant line: heat lamps, a grill, a red espresso machine.
+  Wrong subject (this is a small teaching kitchen) and far too cluttered to carry large
+  white type.
+- **bread** — the photographer's name **watermarked into the bottom-left corner**. Found by
+  cropping that corner and enlarging it, not by looking at the thumbnail.
+- **pasta** — dry noodles on a white plastic tray under flat overhead light.
+- **about** — a stainless-steel industrial kitchen with people in the background.
+
+**The lesson is about the source, not the search.** Wikimedia Commons is a documentation
+archive; its food photography is overwhelmingly snapshots. A second round moved to **Burst
+by Shopify**, whose licence was read verbatim during this session — commercial use,
+modification allowed, **attribution not required** — and whose library is deliberately
+styled. Six of the first eight Burst candidates were *also* rejected on sight. The same
+result from a better source, and the same conclusion: **the only reliable filter is opening
+the file.**
+
+**And a process failure of my own, worth more than the images.** Cleaning up the throwaway
+measurement scripts, I wrote a keep-list from memory, deleted 14 files, and **deleted
+`tools/make-og.mjs` — a documented project tool that `README.md` instructs the operator to
+run.** Restored with `git checkout`. The rule this breaks: when removing files, the
+repository's own documentation is the contract, and a keep-list invented from memory is
+not. The check is one command — grep the README for tool names and confirm each still
+exists — and it was not run first.
+
+**Scope:** the site itself was never touched. Everything lives under `docs/redesign/`, and
+`tools/build.mjs` skips `docs/`, so the live 16 routes are byte-identical to before.
+
+---
+
 ## Findings deliberately left open
 
 | Finding | Why it is not fixed here |

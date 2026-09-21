@@ -208,14 +208,30 @@ tools/form-e2e.mjs                       drives a browser through the form's rea
 tools/nojs-post-check.mjs                the same form with JavaScript disabled
 tools/css-cost.mjs                       bytes added to the stylesheet, raw / gzip / brotli
 tools/preview-check.mjs                  renders the background preview; 375px overflow check
+tools/serve-docs.mjs                     serves the design previews under docs/ (port 4211)
+tools/redesign-check.mjs                 asserts the redesign layout at 375 / 768 / 1280px
+tools/weigh-redesign.mjs                 first-screen vs on-scroll transfer for the preview
+tools/fetch-photos.mjs                   downloads the Wikimedia photos via the Commons API
+tools/optimize-photos.mjs                emits jpg/webp/avif at display widths
+tools/burst-photos.mjs                   downloads the Burst photos, crops to 3:2, encodes
 docs/design/background-system.md         the background/UI design specification
+docs/redesign/index.html                 the redesign proposal (A direction)
+docs/redesign/redesign.css               its stylesheet, token-for-token against style.css
+docs/redesign/photos.md                  photo sources, licences, and rejected candidates
 docs/backgrounds-preview.html            the three background directions side by side
 tests/validate.test.js                   13 tests for the form rules
 .github/workflows/deploy-pages.yml       push to main -> build -> deploy
 ```
 
-The two `docs/` entries above are design material, not part of the site: `tools/build.mjs`
-skips `docs/`, and the deploy workflow uploads only `dist/`, so neither is ever published.
+The four `docs/` entries above are design material, not part of the site: `tools/build.mjs`
+skips `docs/`, and the deploy workflow uploads only `dist/`, so none of it is ever
+published. Run `node tools/serve-docs.mjs` and open <http://127.0.0.1:4211/> for an index
+of them — `npm run dev` cannot serve these, because it serves `dist/` when a build exists
+and `docs/` is deliberately not in `dist/`.
+
+**Encoding the photographs needs `ffmpeg` on PATH.** This project has no `sharp`, no
+ImageMagick and no `cwebp`; `libwebp` and `libaom-av1` were verified available. See
+`docs/redesign/photos.md` for the licences and for two traps worth not rediscovering.
 Open the preview straight from disk — `docs/backgrounds-preview.html` — because
 `npm run dev` serves `dist/`, which does not contain it. It loads `../assets/style.css`, so
 it always shows the real stylesheet.
