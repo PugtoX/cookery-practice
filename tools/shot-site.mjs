@@ -54,16 +54,32 @@ await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 })
 await page.evaluate(() => new Promise((res) => setTimeout(res, 800)))
 
 const m = await page.evaluate(() => {
-  const img = document.querySelector('.hero__img')
-  const cs = img ? getComputedStyle(img) : null
+  const q = (s) => document.querySelector(s)
+  const box = (s) => {
+    const e = q(s)
+    if (!e) return null
+    const b = e.getBoundingClientRect()
+    return { left: Math.round(b.left), width: Math.round(b.width) }
+  }
+  const heroImg = q('.hero__img')
+  const headImg = q('.page-head figure img')
+  const display = q('.hero h1') ?? q('.page-head h1')
+  const h1cs = display ? getComputedStyle(display) : null
+  const pic = heroImg ?? headImg
+  const pcs = pic ? getComputedStyle(pic) : null
   return {
-    heroPresent: !!img,
-    heroRendered: img ? `${img.naturalWidth}x${img.naturalHeight}` : 'none',
-    heroChosenSrc: img ? img.currentSrc.split('/').pop() : 'none',
-    heroOpacity: cs?.opacity,
-    h1Size: Math.round(parseFloat(getComputedStyle(document.querySelector('h1')).fontSize)),
-    h1Family: getComputedStyle(document.querySelector('h1')).fontFamily.split(',')[0],
-    wrapW: Math.round(document.querySelector('.hero .wrap').getBoundingClientRect().width),
+    heroPresent: !!heroImg,
+    heroRendered: heroImg ? `${heroImg.naturalWidth}x${heroImg.naturalHeight}` : 'none',
+    heroChosenSrc: heroImg ? heroImg.currentSrc.split('/').pop() : 'none',
+    heroOpacity: heroImg ? getComputedStyle(heroImg).opacity : 'n/a',
+    headFigure: !!headImg,
+    headImgRendered: headImg ? `${headImg.naturalWidth}x${headImg.naturalHeight}` : 'none',
+    headImgSrc: headImg ? headImg.currentSrc.split('/').pop() : 'none',
+    headFigureBox: box('.page-head figure'),
+    headImgBox: box('.page-head figure img'),
+    h1Size: h1cs ? Math.round(parseFloat(h1cs.fontSize)) : 'n/a',
+    h1Family: h1cs ? h1cs.fontFamily.split(',')[0] : 'n/a',
+    container: box('.hero .wrap') ?? box('.page-head .wrap'),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     cards: document.querySelectorAll('.card').length,
     cardImgs: [...document.querySelectorAll('.card__media')].filter((i) => i.naturalWidth > 0).length,
@@ -95,12 +111,34 @@ const bands = await page.evaluate(() => {
 console.log('horizontal bands:')
 console.log(JSON.stringify(bands, null, 2))
 
-writeFileSync(`${process.env.TEMP}/live-home.png`, await page.screenshot({ fullPage: false }))
-
-// A class page: no hero, page-head texture, wide container.
-// Trailing slash on LIVE_URL would otherwise produce a doubled "//" path.
-await page.goto(new URL('classes/knife-skills/', url).href, { waitUntil: 'networkidle2' })
-writeFileSync(`${process.env.TEMP}/live-class.png`, await page.screenshot({ fullPage: false }))
+// Shoot the home page and one class page at desktop width, then the class page again
+// at 375px — the class pages are the only ones carrying a picture inside `.page-head`,
+// and 375px is where a full-width figure is most likely to push the page sideways.
+// Each file gets a distinct temp name: the old version wrote both shots to the same
+// two names, so a failure on the second page silently left the first page's bytes in
+// `live-class.png` and the result got read as a site defect rather than a script bug.
+const shots = [
+  ['index.html', 'live-home.png', { width: 1280, height: 900 }],
+  ['classes/knife-skills.html', 'live-class.png', { width: 1280, height: 900 }],
+  ['classes/knife-skills.html', 'live-class-375.png', { width: 375, height: 812 }],
+  ['classes/market-table.html', 'live-class-market.png', { width: 1280, height: 900 }],
+]
+for (const [path, name, viewport] of shots) {
+  await page.setViewport(viewport)
+  await page.goto(new URL(path, url).href, { waitUntil: 'networkidle2', timeout: 60000 })
+  await page.evaluate(() => new Promise((res) => setTimeout(res, 300)))
+  const probe = await page.evaluate(() => {
+    const img = document.querySelector('.page-head figure img') ?? document.querySelector('.hero__img')
+    return {
+      title: document.title.slice(0, 40),
+      img: img ? `${img.naturalWidth}x${img.naturalHeight} ${img.currentSrc.split('/').pop()}` : 'NO IMAGE',
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    }
+  })
+  console.log(`${path} @${viewport.width}px → ${JSON.stringify(probe)}`)
+  writeFileSync(`${process.env.TEMP}/${name}`, await page.screenshot({ fullPage: false }))
+}
+console.log(`failed requests: ${failed.length ? failed.join(', ') : 'none'}`)
 
 await browser.close()
 server.close()

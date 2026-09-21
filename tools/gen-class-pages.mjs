@@ -59,6 +59,17 @@ const classes = [
       ['Bring', 'Closed shoes and a container; we provide everything else'],
     ],
     dates: 'This class runs on Saturdays and Sundays, starting at 9am. Ask us for the next available date and we will reply within one working day.',
+    // The same photograph the home page card for this class uses, so one file serves
+    // both slots — a visitor who clicked through has already fetched it. Intrinsic
+    // sizes differ per slot (measured: 800x534 here, 1280x853 knife, 1280x960 market);
+    // the CSS crops them all to 3:2, and the width/height below are the real pixel
+    // dimensions, which is what the browser needs to reserve the right box.
+    img: {
+      file: 'bread-baking',
+      alt: 'A floured round sourdough loaf with a scored top, held in two hands',
+      w: 800,
+      h: 534,
+    },
     next: { href: '../classes/pasta-from-scratch.html', label: 'See the pasta class' },
   },
   {
@@ -93,6 +104,12 @@ const classes = [
       ['Bring', 'Closed shoes and a container for leftovers'],
     ],
     dates: 'This class runs on Wednesday and Friday evenings at 6pm. Ask us for the next available date and we will reply within one working day.',
+    img: {
+      file: 'pasta-from-scratch',
+      alt: 'A ball of dough, a rolling pin and tomatoes on a floured dark table',
+      w: 800,
+      h: 534,
+    },
     next: { href: '../classes/market-table.html', label: 'See the market table class' },
   },
   {
@@ -127,6 +144,12 @@ const classes = [
       ['Bring', 'Closed shoes, a hat, and a bag for market shopping'],
     ],
     dates: 'This class runs on Saturdays, meeting at the market at 9am. Ask us for the next available date and we will reply within one working day.',
+    img: {
+      file: 'market-table',
+      alt: 'Boxes of fresh vegetables and greens stacked on market tables',
+      w: 1280,
+      h: 960,
+    },
     next: { href: '../classes/bread-baking.html', label: 'See the bread class' },
   },
 ]
@@ -222,6 +245,19 @@ const page = (c) => `<!doctype html>
           <p class="eyebrow"><a href="../classes.html">Classes</a> · ${c.eyebrow}</p>
           <h1>${c.h1}</h1>
           <p class="lede">${c.lede}</p>
+          <figure>
+            <picture>
+              <source type="image/avif" srcset="../assets/img/${c.img.file}.avif" />
+              <source type="image/webp" srcset="../assets/img/${c.img.file}.webp" />
+              <img
+                src="../assets/img/${c.img.file}.jpg"
+                alt="${c.img.alt}"
+                width="${c.img.w}"
+                height="${c.img.h}"
+                decoding="async"
+              />
+            </picture>
+          </figure>
         </div>
       </section>
 

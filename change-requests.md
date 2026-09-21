@@ -234,13 +234,70 @@ exists — and it was not run first.
 
 ---
 
+## CR-9 · 四个课程详情页没有照片 —— 是规划漏了，不是实现漏了
+
+**现状（改动前）**：`classes/{knife-skills,bread-baking,market-table,pasta-from-scratch}.html`
+四页**一张图都没有**，而首页有 hero 加四张卡片图。
+`docs/redesign/photos.md` 的槽位表只排了首页的六个槽位（hero、四张卡片、about），
+**课程详情页从来没有被排进去过** —— 所以这不是「做了忘了」，是**设计阶段没规划**。
+搜索流量真正落地的是这四个页面（`Bread Baking Class in Sydney` 这类词打的就是它们），
+落差正好落在最需要转化的一页上。
+
+**改动**：每页在 `page-head` 的 lede 之后加一张 `<figure>`，
+复用首页卡片已经在用的同名图片（同一个文件服务两个槽位，点进来的访客**已经缓存过了**）。
+`page-head figure` 一条 CSS 规则：3:2 裁切、与页面同宽。
+
+**两个来源的坑**：三页由 `tools/gen-class-pages.mjs` 生成，`knife-skills.html` 是**手写**的，
+只能手改。这个「三页生成 + 一页手写」的双轨来源是既有的架构选择
+（生成器头注释写明它只用于结构性改动，手改为准），这次按它办，但**记得它是个坑**。
+
+### 本轮自己的两个失误
+
+**1. alt 文本凭记忆写，错了。** 四条 alt 我先按印象写了，然后才去看图 —— 结果
+`pasta-from-scratch` 那张是**面团加擀面杖加番茄**（源文件名 `pizza-dough-ready-to-roll`），
+我却写成 "Fresh egg dough **rolled out**"：蛋不在画面里，"rolled out" 也不是画面状态。
+`bread-baking` 那张是**双手托着整只割纹面包**，我写成 "on a wooden board"。
+`knife-skills` 那张是**双手用中式菜刀剁红辣椒**，我写成 "A hand chopping red vegetables"。
+改法：**看图之后重写**三条。
+`market-table`（市场摊位上成箱的蔬菜）这条基本准确，未改。
+**规则收紧：alt 是给看不到图的人的唯一描述，它必须来自看图，不能来自记忆或源文件名。**
+
+**2. `tools/shot-site.mjs` 崩了，而我差点把它读成站点缺陷。**
+脚本假设每个页面都有 `.hero`，在 `shot-site.mjs:56` 对 `document.querySelector('.hero .wrap')`
+取 `getBoundingClientRect()` 时抛 `TypeError`，于是**没走到截图那一步**；
+而我当时是在一个**只服务 `docs/` 的服务器**上跑的，页面本来就是 404。
+两个原因叠加，`live-class.png` 里是一片深色的 "nf" 空帧 ——
+**我差点据此判定「课程页渲染坏了」。**
+改法：脚本改成不依赖页面类型（hero 或 page-head figure 都测），
+并按页面逐个取图、**每个截图一个独立文件名**（旧版两次截图同名，失败时会留下上一次的字节，
+本身就是误判的温床）。修后实测 4 个视口 0 failed requests。
+
+### 验证（全部实跑）
+
+| 检查 | 结果 |
+|---|---|
+| `structure-check.mjs` | 47/47 |
+| `seo-check.mjs` | 232/232 |
+| `viewport-check.mjs` | 22/22（375px 无横向滚动；新增全宽图是这次最可能引起横向滚动的改动） |
+| `tools/link-check.mjs` | 11 页 172 引用，0 断链 |
+| `npm test` | 13/13 |
+| `shot-site.mjs` | 首页 1280、课程页 1280、课程页 375、market 页 1280 —— 图均渲染，`overflow: 0`，0 failed requests |
+| CSS 爆炸半径 | 全站 `<figure>` 只有这 4 个，且都在 `.page-head` 内；另外 8 个页面各有 `.page-head` 但无 `<figure>`，不受影响 |
+| `git diff --stat`（classes） | 4 文件各 +13 行、**0 删除** —— 生成器覆写没有丢掉手改内容 |
+
+**遗留**：首页卡片图与本次 alt 不同（卡片文案按教学场景写，例如 "
+Hands chopping red chillies on a wooden board"）。两者都指同一张照片但描述不同，
+**未动** —— 那是既有内容，不在本次范围。
+
+---
+
 ## Findings deliberately left open
 
 | Finding | Why it is not fixed here |
 |---|---|
 | `spt-site`'s canonical points at `saiyingpunpt.com`, which does not resolve (NXDOMAIN, verified) | It is a separate live site. Changing it is the owner's call, and the fix is either buying the domain or repointing three URLs. It also changes what that project can honestly claim, so it should not happen silently. |
 | Stage 9 (custom domain) not executed | Needs a purchased domain. |
-| No image compression evidence on this site | The site ships no raster images. That acceptance item is covered by `portfolio` (486 KB → 44.8 KB), not here. |
+| Image compression evidence | No longer "the site ships no raster images" — the redesign added 21 files / 3.9 MB under `assets/img/`, and CR-9 added four more uses of them. The three-format `<picture>` (AVIF → WebP → JPEG) is itself the compression measure, and the figures are measured in `docs/redesign/photos.md`; what is still missing is a *before/after* number of the kind `portfolio` has (486 KB → 44.8 KB), because these were downloaded already-sized rather than compressed here. |
 | ~~`novalidate` leaves the no-JS path unvalidated (CR-7)~~ | **Fixed** — the script sets `novalidate` at runtime instead of the markup setting it for everyone. A no-JS submission now gets the browser's native `required` check, and an incomplete one makes no request. |
 | Where Formspree files a submission (CR-6) | Not measurable from here, and it changes over time — early submissions to spam, later identical ones to the inbox. Resolved in practice: no spam since `12:17`. |
 | No real-device test on a phone | The 375px checks run in a browser with an emulated viewport. That is not a phone, and it is not described as one. |
